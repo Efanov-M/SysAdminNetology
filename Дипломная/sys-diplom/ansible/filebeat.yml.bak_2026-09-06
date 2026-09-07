@@ -1,0 +1,82 @@
+- name: Install and configure Filebeat
+  hosts: web
+  become: true
+
+  tasks:
+    - name: Download Elastic repository signing key
+      ansible.builtin.get_url:
+        url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        dest: /etc/apt/keyrings/elastic.asc
+        mode: "0644"
+
+    - name: Add Elastic 9.x APT repository
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/elastic-9.x.list
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          deb [signed-by=/etc/apt/keyrings/elastic.asc] https://artifacts.elastic.co/packages/9.x/apt stable main
+
+    - name: Install Filebeat 9.5.3
+      ansible.builtin.apt:
+        name: filebeat=9.5.3
+        state: present
+        update_cache: true
+
+    - name: Configure Filebeat output
+      ansible.builtin.copy:
+        dest: /etc/filebeat/filebeat.yml
+        owner: root
+        group: root
+        mode: "0600"
+        content: |
+          filebeat.config.modules:
+            path: ${path.config}/modules.d/*.yml
+            reload.enabled: false
+
+          output.elasticsearch:
+            hosts:
+              - "http://elasticsearch.ru-central1.internal:9200"
+
+          logging.level: info
+          logging.to_files: true
+          logging.files:
+            path: /var/log/filebeat
+            name: filebeat
+            keepfiles: 7
+            permissions: 0640
+
+    - name: Configure nginx module
+      ansible.builtin.copy:
+        dest: /etc/filebeat/modules.d/nginx.yml
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          - module: nginx
+            access:
+              enabled: true
+              var.paths:
+                - /var/log/nginx/access.log*
+
+            error:
+              enabled: true
+              var.paths:
+                - /var/log/nginx/error.log*
+
+    - name: Test Filebeat configuration
+      ansible.builtin.command:
+        cmd: filebeat test config -e
+      changed_when: false
+
+    - name: Test Elasticsearch connection
+      ansible.builtin.command:
+        cmd: filebeat test output -e
+      changed_when: false
+
+    - name: Enable and restart Filebeat
+      ansible.builtin.service:
+        name: filebeat
+        state: restarted
+        enabled: true

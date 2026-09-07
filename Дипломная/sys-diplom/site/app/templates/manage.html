@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="min-h-screen bg-slate-100">
+    <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <section class="mb-6 overflow-hidden rounded-[2rem] bg-gradient-to-r from-slate-900 via-cyan-800 to-teal-700 px-6 py-6 text-white shadow-xl">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div class="max-w-3xl">
+            <p class="text-xs uppercase tracking-[0.35em] text-cyan-100">Manage</p>
+            <h1 class="mt-2 text-3xl font-semibold">Управление данными семьи</h1>
+            <p class="mt-2 text-sm leading-6 text-cyan-50">Отдельный экран для создания пациента, smart import, экспорта и восстановления. Главный экран остаётся сфокусированным на быстром вводе и динамике.</p>
+          </div>
+          <a href="/{% if selected_patient %}?selected_patient_id={{ selected_patient.id }}{% endif %}" class="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20">Назад к карте</a>
+        </div>
+      </section>
+
+      <section class="grid gap-5 lg:grid-cols-2">
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <h2 class="text-xl font-semibold text-slate-900">Новый пациент</h2>
+          <form method="post" action="/patients" class="mt-4 space-y-3">
+            <input name="name" required placeholder="Имя пациента" class="w-full rounded-2xl border-slate-300 bg-slate-50" />
+            <select name="patient_type" class="w-full rounded-2xl border-slate-300 bg-slate-50">
+              <option value="elderly">Взрослый</option>
+              <option value="child">Ребёнок</option>
+            </select>
+            <input name="date_of_birth" type="date" class="w-full rounded-2xl border-slate-300 bg-slate-50" />
+            <textarea name="notes" placeholder="Аллергии, важные замечания" class="w-full rounded-2xl border-slate-300 bg-slate-50"></textarea>
+            <button type="submit" class="w-full rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-600">Сохранить пациента</button>
+          </form>
+        </article>
+
+        {% if selected_patient and selected_patient_can_edit %}
+          <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <h2 class="text-xl font-semibold text-slate-900">Умный импорт документа</h2>
+            <form method="post" action="/patients/{{ selected_patient.id }}/import/pdf/review" enctype="multipart/form-data" class="mt-4 space-y-3">
+              <input name="file" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required class="w-full rounded-2xl border border-slate-300 bg-slate-50 p-3" />
+              <input name="confidence_threshold" type="number" min="0" max="1" step="0.05" value="0.80" class="w-full rounded-2xl border border-slate-300 bg-slate-50 p-3" />
+              <button type="submit" class="w-full rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-600">Открыть smart review</button>
+            </form>
+          </article>
+        {% endif %}
+
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <h2 class="text-xl font-semibold text-slate-900">Восстановление из ZIP</h2>
+          <form method="post" action="/backup/restore/wizard" enctype="multipart/form-data" class="mt-4 space-y-3">
+            <select id="restore_mode" name="restore_mode" class="w-full rounded-2xl border-slate-300 bg-slate-50">
+              <option value="merge">Добавить к текущим данным</option>
+              <option value="replace">Заменить все мои данные</option>
+            </select>
+            <input id="backup_file" name="file" type="file" accept=".zip,application/zip" required class="w-full rounded-2xl border border-slate-300 bg-slate-50 p-3" />
+            <button type="submit" class="w-full rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-600">Открыть restore wizard</button>
+          </form>
+        </article>
+
+        {% if selected_patient and selected_patient_can_edit %}
+          <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <h2 class="text-xl font-semibold text-slate-900">Экспорт и напоминания</h2>
+            <div class="mt-4 flex flex-wrap gap-2">
+              <a class="rounded-full bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200" href="/backup/download">Резервная копия ZIP</a>
+              <a class="rounded-full bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200" href="/family/export">Скачать всю семью</a>
+              <a class="rounded-full bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200" href="/patients/{{ selected_patient.id }}/export">Скачать карту</a>
+              <a class="rounded-full bg-slate-100 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-200" href="/patients/{{ selected_patient.id }}/reminders.ics">Напоминания</a>
+            </div>
+          </article>
+        {% endif %}
+      </section>
+    </div>
+  </main>
+{% endblock %}

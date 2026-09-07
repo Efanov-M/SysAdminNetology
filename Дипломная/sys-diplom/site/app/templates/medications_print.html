@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page print-page">
+    <section class="hero print-hide">
+      <div class="hero-header">
+        <div>
+          <h1>Лекарства для печати</h1>
+          <p class="muted">{{ patient.name }}{% if layout == "today" %} • Что принимать сегодня{% endif %}</p>
+        </div>
+        <div class="inline">
+          <button type="button" onclick="window.print()">Печать</button>
+          <a class="btn-secondary btn-link" href="/">Назад</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>{% if layout == "today" %}Что принимать сегодня{% else %}Расписание лекарств{% endif %}</h2>
+      {% if layout == "weekly" %}
+        <p class="muted">Недельный лист по активным препаратам с короткими бытовыми подсказками по приёму.</p>
+      {% endif %}
+      <div class="list">
+        {% for med in medications %}
+          {% if layout not in ["today", "weekly"] or med.is_active %}
+          <div class="list-item">
+            <div><strong>{{ med.name }}</strong></div>
+            <div>{{ med.dosage or "Без дозировки" }}</div>
+            <div>{{ med.schedule or "График не указан" }}</div>
+            <div>{{ "Активно" if med.is_active else "Отключено" }}</div>
+            <div>{{ med.instructions or med.notes or "Инструкция не указана" }}</div>
+            {% if layout == "weekly" %}
+              <div class="small">Подсказка: отметьте приём утром / днём / вечером и держите лист рядом с лекарствами.</div>
+            {% endif %}
+            {% if med.reminder_enabled and med.reminder_time %}
+              <div class="small">Напоминание: {{ med.reminder_time.strftime("%H:%M") }}</div>
+            {% endif %}
+          </div>
+          {% endif %}
+        {% else %}
+          <p class="muted">Нет назначений.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+{% endblock %}

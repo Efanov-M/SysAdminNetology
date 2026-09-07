@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page print-page">
+    <section class="hero print-hide">
+      <div class="hero-header">
+        <div>
+          <h1>Карта пациента для печати</h1>
+          <p class="muted">{{ patient.name }}{% if layout != "default" %} • {{ layout }}{% endif %}</p>
+        </div>
+        <div class="inline">
+          <button type="button" onclick="window.print()">Печать</button>
+          <a class="btn-secondary btn-link" href="/">Назад</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>{{ patient.name }}</h2>
+      <p>Дата рождения: {{ patient.date_of_birth or "не указана" }}</p>
+      {% if patient.notes %}<p>{{ patient.notes }}</p>{% endif %}
+    </section>
+
+    {% if emergency_info %}
+      <section class="card">
+        <h2>Экстренная информация</h2>
+        <p><strong>Группа крови:</strong> {{ emergency_info.blood_type or "не указана" }}</p>
+        <p><strong>Аллергии:</strong> {{ emergency_info.allergies or "нет данных" }}</p>
+        <p><strong>Хронические заболевания:</strong> {{ emergency_info.chronic_diseases or emergency_info.diagnoses or "нет данных" }}</p>
+        <p><strong>Постоянные препараты:</strong> {{ emergency_info.permanent_medications or "нет данных" }}</p>
+        <p><strong>Контакты:</strong> {{ emergency_info.emergency_contacts or "нет данных" }}</p>
+        {% if layout == "ambulance" %}
+          <p><strong>Для скорой:</strong> критичные аллергии, контакты и текущие препараты должны быть проверены первыми.</p>
+        {% elif layout == "admission" %}
+          <p><strong>Для приёмного отделения:</strong> возьмите этот лист вместе с выписками и текущими назначениями.</p>
+        {% elif layout == "relative" %}
+          <p><strong>Для родственника:</strong> здесь короткая сводка, что важно знать без входа в приложение.</p>
+        {% endif %}
+      </section>
+    {% endif %}
+
+    <section class="legacy-grid">
+      <article class="card">
+        <h2>Последние показатели</h2>
+        <div class="list">
+          {% for item in observations %}
+            <div class="list-item">
+              <div><strong>{{ item.created_at.strftime("%d.%m.%Y %H:%M") }}</strong></div>
+              {% if item.type == "blood_pressure" %}
+                <div>{{ item.value.sys }}/{{ item.value.dia }} мм рт. ст.</div>
+              {% elif item.type == "lab_result" %}
+                <div>{{ item.value.test_name }}: {{ item.value.value }} {{ item.value.unit or "" }}</div>
+              {% else %}
+                <div>{{ item.type }}: {{ item.value.value }} {{ item.value.unit or "" }}</div>
+              {% endif %}
+            </div>
+          {% else %}
+            <p class="muted">Нет записей.</p>
+          {% endfor %}
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Назначения</h2>
+        <div class="list">
+          {% for med in medications %}
+            <div class="list-item">
+              <div><strong>{{ med.name }}</strong></div>
+              <div>{{ med.dosage or "Без дозировки" }}</div>
+              <div class="small">{{ med.schedule or "Без графика" }}</div>
+              <div class="small">{{ med.instructions or med.notes or "Инструкция не указана" }}</div>
+            </div>
+          {% else %}
+            <p class="muted">Нет назначений.</p>
+          {% endfor %}
+        </div>
+      </article>
+    </section>
+  </main>
+{% endblock %}

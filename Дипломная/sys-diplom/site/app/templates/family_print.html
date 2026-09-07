@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page print-page">
+    <section class="hero print-hide">
+      <div class="hero-header">
+        <div>
+          <h1>Семейная карта для печати</h1>
+          <p class="muted">{{ payload.owner_login or payload.owner_email }}</p>
+        </div>
+        <div class="inline">
+          <button type="button" onclick="window.print()">Печать</button>
+          <a class="btn-secondary btn-link" href="/">Назад</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="stack">
+      <article class="card print-hide">
+        <h2>Узкие printable-пакеты</h2>
+        <div class="inline">
+          <a class="btn-secondary btn-link" href="/family/print/packet?packet=shift_handover">Передача смены</a>
+          <a class="btn-secondary btn-link" href="/family/print/packet?packet=respiratory_route">Дыхательный маршрут</a>
+          <a class="btn-secondary btn-link" href="/family/print/packet?packet=palliative_daily">Паллиативный уход дома</a>
+          <a class="btn-secondary btn-link" href="/family/print/packet?packet=weekday_shift">Будни</a>
+          <a class="btn-secondary btn-link" href="/family/print/packet?packet=weekend_shift">Выходные</a>
+        </div>
+      </article>
+      {% for record in payload.patients %}
+        <article class="card">
+          <h2>{{ record.patient.name }}</h2>
+          <p>Дата рождения: {{ record.patient.date_of_birth or "не указана" }}</p>
+          {% if record.patient.notes %}<p>{{ record.patient.notes }}</p>{% endif %}
+          <div class="small">Показателей: {{ record.observations|length + record.lab_results|length }} • Назначений: {{ record.medications|length }} • Документов: {{ record.documents|length }}</div>
+        </article>
+      {% else %}
+        <article class="card"><p class="muted">Нет пациентов.</p></article>
+      {% endfor %}
+    </section>
+  </main>
+{% endblock %}

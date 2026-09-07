@@ -1,0 +1,45 @@
+- name: Deploy Elasticsearch
+  hosts: elasticsearch
+  become: true
+
+  tasks:
+    - name: Create Elasticsearch directory
+      ansible.builtin.file:
+        path: /opt/elasticsearch
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Create Elasticsearch compose file
+      ansible.builtin.copy:
+        dest: /opt/elasticsearch/compose.yaml
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          services:
+            elasticsearch:
+              image: docker.elastic.co/elasticsearch/elasticsearch:9.5.3
+              container_name: elasticsearch
+              restart: unless-stopped
+
+              environment:
+                - discovery.type=single-node
+                - xpack.security.enabled=false
+                - ES_JAVA_OPTS=-Xms1g -Xmx1g
+
+              ports:
+                - "9200:9200"
+
+              volumes:
+                - elasticsearch-data:/usr/share/elasticsearch/data
+
+          volumes:
+            elasticsearch-data:
+
+    - name: Start Elasticsearch
+      ansible.builtin.command:
+        cmd: docker compose up -d
+        chdir: /opt/elasticsearch
+      changed_when: true

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "partials/page_header.html" import page_header %}
+{% block body %}
+  <main class="min-h-screen bg-slate-100">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      {% set dashboard_home_href = ('/?selected_patient_id=' ~ selected_patient.id) if selected_patient else '/' %}
+      {% call page_header("Family PHR MVP", "Карта семьи", "", current_screen != "main", dashboard_home_href, "/") %}
+        <a class="rounded-full bg-white/15 px-4 py-2 font-medium text-white transition hover:bg-white/25" href="/inbox">Inbox</a>
+        <a class="rounded-full bg-white/15 px-4 py-2 font-medium text-white transition hover:bg-white/25" href="/account">Аккаунт</a>
+        {% if user.role == "owner" %}
+          <a class="rounded-full bg-white/15 px-4 py-2 font-medium text-white transition hover:bg-white/25" href="/family/users">Члены семьи</a>
+        {% endif %}
+        <a class="rounded-full bg-white/15 px-4 py-2 font-medium text-white transition hover:bg-white/25" href="/medications/search{% if selected_patient %}?selected_patient_id={{ selected_patient.id }}{% endif %}">Препараты</a>
+        <form method="post" action="/logout">
+          <button type="submit" class="rounded-full border border-white/30 px-4 py-2 font-medium text-white transition hover:bg-white/10">Выйти</button>
+        </form>
+      {% endcall %}
+
+      {% if message %}
+        <div class="mb-4 rounded-2xl border px-4 py-3 text-sm {% if is_error %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-700{% endif %}">
+          {{ message }}
+        </div>
+      {% endif %}
+
+      {% include "partials/dashboard_shell.html" %}
+    </div>
+  </main>
+{% endblock %}

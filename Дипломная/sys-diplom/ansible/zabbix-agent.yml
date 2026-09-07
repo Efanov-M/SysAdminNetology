@@ -1,0 +1,37 @@
+---
+- name: Install Zabbix Agent 2
+  hosts: zabbix_agents
+  become: true
+
+  tasks:
+    - name: Download Zabbix repository package
+      ansible.builtin.get_url:
+        url: https://repo.zabbix.com/zabbix/7.4/release/ubuntu/pool/main/z/zabbix-release/zabbix-release_latest+ubuntu24.04_all.deb
+        dest: /tmp/zabbix-release.deb
+        mode: "0644"
+
+    - name: Install Zabbix repository
+      ansible.builtin.apt:
+        deb: /tmp/zabbix-release.deb
+        state: present
+
+    - name: Install Zabbix Agent 2
+      ansible.builtin.apt:
+        name: zabbix-agent2
+        state: present
+        update_cache: true
+    - name: Configure Zabbix Agent 2 active checks
+      ansible.builtin.copy:
+        dest: /etc/zabbix/zabbix_agent2.d/diploma.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          ServerActive=10.10.10.4
+          Hostname={{ inventory_hostname }}
+
+    - name: Enable and restart Zabbix Agent 2
+      ansible.builtin.service:
+        name: zabbix-agent2
+        state: restarted
+        enabled: true

@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page">
+    <section class="hero">
+      <div class="hero-header">
+        <div>
+          <h1>Монитор очереди уведомлений</h1>
+          <p class="muted">Статус worker'а, повторы доставки и застрявшие задачи.</p>
+        </div>
+        <a class="btn-secondary btn-link" href="/account">Назад</a>
+      </div>
+    </section>
+
+    <section class="legacy-grid account-grid">
+      <article class="card stack">
+        <h2>Worker</h2>
+        <div><strong>Статус:</strong> {{ worker_health.status }}</div>
+        <div class="small muted">Последний heartbeat: {{ worker_health.last_seen or "нет данных" }}</div>
+        <div class="small muted">Возраст heartbeat: {{ worker_health.age_seconds if worker_health.age_seconds is not none else "n/a" }} сек.</div>
+        <div class="small muted">Worker pool: {{ worker_pool.status }} • инстансов {{ worker_pool.count }}</div>
+        <div class="small muted">Рестартов в истории: {{ worker_pool.restarts|length }}</div>
+      </article>
+
+      <article class="card stack">
+        <h2>Очередь</h2>
+        <div><strong>Всего в очереди:</strong> {{ queue_stats.queued }}</div>
+        <div><strong>Застрявшие:</strong> {{ queue_stats.stale }}</div>
+        <div><strong>Макс. попыток:</strong> {{ queue_stats.max_attempts }}</div>
+        <div class="small muted">
+          По каналам:
+          {% for channel, count in queue_stats.channels.items() %}
+            {{ channel }}={{ count }}{% if not loop.last %}, {% endif %}
+          {% else %}
+            очередь пуста
+          {% endfor %}
+        </div>
+        {% if queue_stats.alerts %}
+          <div class="banner error">{{ queue_stats.alerts|join(" • ") }}</div>
+        {% endif %}
+        {% if operational_alerts %}
+          <div class="banner error">{{ operational_alerts|join(" • ") }}</div>
+        {% endif %}
+        {% if sla_alerts %}
+          <div class="banner error">{{ sla_alerts|join(" • ") }}</div>
+        {% endif %}
+        {% if removed_history %}
+          <div class="small muted">Retention cleanup: автоматически удалено {{ removed_history }} старых инцидентов.</div>
+        {% endif %}
+        <div class="inline">
+          <a class="btn-secondary btn-link" href="/account/worker-monitor/incidents">Экспорт инцидентов</a>
+          <a class="btn-secondary btn-link" href="/account/worker-monitor/incidents-page">Страница инцидентов</a>
+          <a class="btn-secondary btn-link" href="/account/worker-monitor/diagnostics">Diagnostics bundle</a>
+          <a class="btn-secondary btn-link" href="/account/worker-monitor/print">Printable summary</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="legacy-grid account-grid">
+      <article class="card">
+        <h2>Сводная диагностика</h2>
+        <div><strong>Каналов с активными инцидентами:</strong> {{ retention_summary.by_channel|length }}</div>
+        <div><strong>Retention событий:</strong> {{ retention_summary.total }}</div>
+        <div class="small muted">Этот экран помогает быстро понять, это локальная проблема канала, деградация worker'а или накопление повторных доставок.</div>
+        <div class="inline">
+          <a class="btn-secondary btn-link" href="/account/worker-monitor/diagnostics">Скачать diagnostics bundle</a>
+          <a class="btn-secondary btn-link" href="/account/worker-monitor/print">Printable runbook</a>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Retention и деградация</h2>
+        <div><strong>Инцидентов в retention:</strong> {{ retention_summary.total }}</div>
+        <div class="small muted">
+          По каналам:
+          {% for channel, count in retention_summary.by_channel.items() %}
+            {{ channel }}={{ count }}{% if not loop.last %}, {% endif %}
+          {% else %}
+            нет истории
+          {% endfor %}
+        </div>
+        {% if degradation_warnings %}
+          <div class="banner error">{{ degradation_warnings|join(" • ") }}</div>
+        {% else %}
+          <p class="muted">За период выраженной деградации каналов не найдено.</p>
+        {% endif %}
+      </article>
+
+      <article class="card">
+        <h2>Рекомендации для администратора</h2>
+        <p class="muted">Подсказки сгруппированы по каналам и self-hosted проверкам: SMTP, Telegram, Matrix, worker и diagnostics bundle.</p>
+        <div class="list">
+          {% for item in admin_runbook %}
+            <div class="list-item">{{ item }}</div>
+          {% else %}
+            <p class="muted">Рекомендаций сейчас нет.</p>
+          {% endfor %}
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Типовые инциденты</h2>
+        <div class="list">
+          <div class="list-item">SMTP: проверьте хост, пароль приложения и исходящую блокировку порта.</div>
+          <div class="list-item">Telegram: проверьте токен бота, chat id и частые ответы 429.</div>
+          <div class="list-item">Matrix: проверьте доступность homeserver, access token и backlog /sync.</div>
+          <div class="list-item">Worker: если heartbeat старый, перезапустите сервис и скачайте diagnostics bundle.</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Инциденты</h2>
+        <div class="list">
+          {% for item in incidents %}
+            <div class="list-item">
+              <div><strong>{{ item.incident_type }}</strong> • {{ item.channel }} -> {{ item.recipient_email or "default" }}</div>
+              <div class="small">Попыток: {{ item.attempts }} • Следующая: {{ item.next_retry_at }}</div>
+              <div class="small muted">{{ item.error }}</div>
+            </div>
+          {% else %}
+            <p class="muted">Инцидентов сейчас нет.</p>
+          {% endfor %}
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>История рестартов worker'ов</h2>
+        <div class="list">
+          {% for item in worker_pool.restarts %}
+            <div class="list-item">
+              <div><strong>{{ item.worker_name }}</strong></div>
+              <div class="small">{{ item.started_at }}</div>
+            </div>
+          {% else %}
+            <p class="muted">Истории рестартов пока нет.</p>
+          {% endfor %}
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Очередь повторов</h2>
+        <div class="list">
+          {% for item in queued_notification_entries %}
+            <div class="list-item">
+              <div><strong>{{ item.channel }}</strong> -> {{ item.recipient_email or "default" }}</div>
+              <div class="small">Попыток: {{ item.attempts }} • Следующая: {{ item.next_retry_at }}</div>
+              <div class="small muted">{{ item.error }}</div>
+            </div>
+          {% else %}
+            <p class="muted">Очередь пуста.</p>
+          {% endfor %}
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>История повторных доставок</h2>
+        <div class="list">
+          {% for item in retry_entries %}
+            <div class="list-item">
+              <div><strong>{{ item.action_label }}</strong></div>
+              <div class="small">{{ item.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+              <div class="small muted">{{ item.details }}</div>
+            </div>
+          {% else %}
+            <p class="muted">Истории повторов пока нет.</p>
+          {% endfor %}
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Retention-история инцидентов</h2>
+        <div class="list">
+          {% for item in incident_history %}
+            <div class="list-item">
+              <div><strong>{{ item.event_type }}</strong> • {{ item.channel or "unknown" }} -> {{ item.recipient_email or "default" }}</div>
+              <div class="small">{{ item.created_at }}{% if item.attempts is not none %} • попыток {{ item.attempts }}{% endif %}</div>
+              <div class="small muted">{{ item.error or item.next_retry_at or "без доп. данных" }}</div>
+            </div>
+          {% else %}
+            <p class="muted">Retention-история пока пуста.</p>
+          {% endfor %}
+        </div>
+      </article>
+    </section>
+  </main>
+{% endblock %}

@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="min-h-screen bg-slate-100">
+    <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <section class="mb-6 overflow-hidden rounded-[2rem] bg-gradient-to-r from-slate-900 via-cyan-800 to-teal-700 px-6 py-6 text-white shadow-xl">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div class="max-w-3xl">
+            <p class="text-xs uppercase tracking-[0.35em] text-cyan-100">Smart Import Review</p>
+            <h1 class="mt-2 text-3xl font-semibold">Review импорта документа</h1>
+            <p class="mt-2 text-lg font-medium text-white">Проверьте найденные значения перед сохранением</p>
+            <p class="mt-2 text-sm leading-6 text-cyan-50">
+              Backend уже извлёк данные из документа, сгруппировал их по лабораторным панелям и подготовил к ручной правке.
+              Здесь остаётся только подтвердить нужные строки, поправить значения и сохранить их в карту пациента.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a class="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20" href="/?selected_patient_id={{ patient.id }}">Назад в карту</a>
+            <a class="rounded-full bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20" href="/patients/{{ patient.id }}/import/pdf/review/{{ review_id }}">Обновить экран</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
+        <aside class="space-y-5">
+          <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <div class="text-xs uppercase tracking-[0.28em] text-slate-500">Документ</div>
+            <h2 class="mt-2 text-xl font-semibold text-slate-900">{{ payload.original_filename }}</h2>
+            <div class="mt-4 grid gap-3">
+              <div class="rounded-[1.25rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+                <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Пациент</div>
+                <div class="mt-2 text-base font-semibold text-slate-900">{{ payload.patient_name }}</div>
+              </div>
+              <div class="rounded-[1.25rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+                <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Пайплайн</div>
+                <div class="mt-2 text-base font-semibold text-slate-900">{{ payload.result.extraction_pipeline }}</div>
+                <div class="mt-1 text-xs text-slate-500">Поддерживаются PDF, JPG и PNG.</div>
+                {% if payload.result.lab_form_template %}
+                  <div class="mt-2 text-xs font-semibold text-emerald-700">Шаблон бланка: {{ payload.result.lab_form_template }}</div>
+                {% endif %}
+              </div>
+              <div class="rounded-[1.25rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+                <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Объём разбора</div>
+                <div class="mt-2 text-base font-semibold text-slate-900">{{ payload.result.page_count }} стр./изобр. • {{ payload.result.candidate_count }} кандидатов</div>
+                <div class="mt-1 text-xs text-slate-500">Страниц: {{ payload.result.page_count }}. Автовыбор начинается от confidence {{ payload.confidence_threshold }}.</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <div class="text-xs uppercase tracking-[0.28em] text-slate-500">Качество извлечения</div>
+            <div class="mt-3 flex items-end gap-3">
+              <div class="text-4xl font-semibold text-slate-900">{{ payload.result.document_confidence_score }}</div>
+              <div class="pb-1 text-sm text-slate-500">общая уверенность распознавания</div>
+            </div>
+            {% if payload.result.photo_quality and payload.result.photo_quality.is_photo %}
+              <div class="mt-4 rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+                <div class="text-sm font-semibold text-slate-900">Подсказка по фото</div>
+                <div class="mt-2 text-sm text-slate-600">{{ payload.result.photo_quality.quality_hint }}</div>
+                {% if payload.result.photo_quality.width %}
+                  <div class="mt-2 text-xs text-slate-500">
+                    Размер {{ payload.result.photo_quality.width }}x{{ payload.result.photo_quality.height }},
+                    яркость {{ payload.result.photo_quality.brightness }}
+                  </div>
+                {% endif %}
+                <div class="mt-3 text-xs uppercase tracking-[0.24em] text-slate-500">Советы:</div>
+                {% if payload.result.photo_quality.suggestions %}
+                  <ul class="mt-3 space-y-2 text-xs text-slate-500">
+                    {% for suggestion in payload.result.photo_quality.suggestions %}
+                      <li class="rounded-xl bg-white px-3 py-2 ring-1 ring-slate-200">{{ suggestion }}</li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <div class="mt-2 rounded-xl bg-white px-3 py-2 text-xs text-slate-500 ring-1 ring-slate-200">Снимок выглядит пригодным, можно сохранить как есть.</div>
+                {% endif %}
+              </div>
+            {% endif %}
+            {% if payload.result.candidate_quality_flags %}
+              <div class="mt-4 space-y-2">
+                <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Улучшения OCR</div>
+                {% for flag in payload.result.candidate_quality_flags %}
+                  <div class="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700 ring-1 ring-emerald-200">{{ flag }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+            {% if payload.result.region_review_hints %}
+              <div class="mt-4 space-y-2">
+                <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Подсказки по сложному скану</div>
+                {% for hint in payload.result.region_review_hints %}
+                  <div class="rounded-xl bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700 ring-1 ring-amber-200">{{ hint }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+            {% if payload.result.handwriting_review_hints %}
+              <div class="mt-4 space-y-2">
+                <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Рукописные исправления и штампы</div>
+                {% for hint in payload.result.handwriting_review_hints %}
+                  <div class="rounded-xl bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700 ring-1 ring-rose-200">{{ hint }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+            {% if payload.result.region_review_summary %}
+              <div class="mt-4 space-y-2">
+                <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Области для ручной верификации</div>
+                {% for item in payload.result.region_review_summary %}
+                  <div class="rounded-xl {% if item.risk == 'high' %}bg-rose-50 text-rose-700 ring-rose-200{% else %}bg-amber-50 text-amber-700 ring-amber-200{% endif %} px-3 py-2 text-xs font-medium ring-1">
+                    <strong>{{ item.region }}</strong>: {{ item.note }}
+                  </div>
+                {% endfor %}
+                <div class="rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600 ring-1 ring-slate-200">Сначала проверьте области с высоким риском, затем сверяйте сомнительные фрагменты с исходным фото или PDF.</div>
+              </div>
+            {% endif %}
+            {% if payload.result.suspicious_review_fragments %}
+              <div class="mt-4 space-y-2">
+                <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Сомнительные фрагменты</div>
+                {% for item in payload.result.suspicious_review_fragments %}
+                  <div class="rounded-xl bg-white px-3 py-2 text-xs text-slate-600 ring-1 ring-slate-200">{{ item }}</div>
+                {% endfor %}
+                <div class="rounded-xl bg-amber-50 px-3 py-2 text-xs font-medium text-amber-800 ring-1 ring-amber-200">Если фрагмент не читается уверенно, оставьте его на ручное подтверждение, а не сохраняйте автоматически.</div>
+              </div>
+            {% endif %}
+          </article>
+
+          <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <div class="text-xs uppercase tracking-[0.28em] text-slate-500">Группы и таблицы</div>
+            <div class="mt-4 space-y-3">
+              {% for group in payload.result.grouped_candidates %}
+                <div class="flex items-center justify-between rounded-[1.25rem] bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
+                  <div>
+                    <div class="font-medium text-slate-900">{{ group["name"] }}</div>
+                    <div class="text-xs text-slate-500">Кандидатов {{ group["items"]|length }}</div>
+                  </div>
+                  <div class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">{{ group["items"]|length }}</div>
+                </div>
+              {% else %}
+                <div class="rounded-[1.25rem] border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Ничего не найдено.</div>
+              {% endfor %}
+            </div>
+            {% if payload.result.table_review_summary %}
+              <div class="mt-4 rounded-[1.25rem] bg-slate-50 p-4 text-xs text-slate-500 ring-1 ring-slate-200">
+                Табличное распознавание:
+                {% for item in payload.result.table_review_summary %}
+                  <span class="font-semibold text-slate-700">{{ item.mode }}</span>={{ item.count }}{% if not loop.last %}, {% endif %}
+                {% endfor %}
+              </div>
+            {% endif %}
+          </article>
+        </aside>
+
+        <section class="space-y-5">
+          {% if payload.result.page_summaries %}
+            <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+              <div class="mb-4">
+                <h2 class="text-xl font-semibold text-slate-900">Сводка по страницам и сравнение значений</h2>
+                <p class="mt-1 text-sm text-slate-500">Так проще понять, где данные повторяются, а где между страницами есть различия.</p>
+              </div>
+              <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {% for page in payload.result.page_summaries %}
+                  <div class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+                    <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Страница {{ page.page }}</div>
+                    <div class="mt-3 text-sm text-slate-700">Анализов: <strong class="text-slate-900">{{ page.lab_results }}</strong></div>
+                    <div class="mt-1 text-sm text-slate-700">Давлений: <strong class="text-slate-900">{{ page.blood_pressure }}</strong></div>
+                    <div class="mt-1 text-sm text-slate-700">Всего кандидатов: <strong class="text-slate-900">{{ page.candidate_count }}</strong></div>
+                  </div>
+                {% endfor %}
+              </div>
+              {% if payload.result.page_comparisons %}
+                <div class="mt-4 grid gap-3">
+                  {% for item in payload.result.page_comparisons %}
+                    <div class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+                      <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="font-semibold text-slate-900">{{ item.test_name }}</div>
+                        <div class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {% if item.status == 'changed' %}bg-amber-100 text-amber-800{% else %}bg-slate-200 text-slate-700{% endif %}">
+                          {% if item.status == "changed" %}Различается между страницами{% else %}Повторяется без изменений{% endif %}
+                        </div>
+                      </div>
+                      <div class="mt-2 text-sm text-slate-600">Страницы: {{ item.pages|join(", ") }}</div>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </article>
+          {% endif %}
+
+          {% if payload.result.duplicate_review_groups %}
+            <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+              <div class="mb-4">
+                <h2 class="text-xl font-semibold text-slate-900">Дубли между страницами</h2>
+                <p class="mt-1 text-sm text-slate-500">Если показатель найден на нескольких страницах, можно оставить только одну строку. Рекомендуемый индекс уже подсвечен по наибольшему confidence.</p>
+              </div>
+              <div class="space-y-3">
+                {% for group in payload.result.duplicate_review_groups %}
+                  <div class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div class="font-semibold text-slate-900">{{ group.test_name }}</div>
+                      <div class="text-xs text-slate-500">рекомендуемый candidate_index={{ group.recommended_candidate_index }}</div>
+                    </div>
+                    <div class="mt-2 text-sm text-slate-600">
+                      Страницы: {{ group.pages|join(", ") if group.pages else "не определены" }} • статус: {{ group.status }}
+                    </div>
+                    <div class="mt-2 text-xs text-slate-500">
+                      Индексы для ручного объединения:
+                      {% for item in group["items"] %}
+                        #{{ item.candidate_index }}{% if not loop.last %}, {% endif %}
+                      {% endfor %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </article>
+          {% endif %}
+
+          <form method="post" action="/patients/{{ patient.id }}/import/pdf/review/{{ review_id }}/apply" class="space-y-5">
+            <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+              <div class="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <h2 class="text-xl font-semibold text-slate-900">Ручная правка перед сохранением</h2>
+                  <p class="mt-1 text-sm text-slate-500">Выберите только нужные строки. Для анализов можно исправить панель, название показателя, значение и единицы. Для давления доступны SYS, DIA и PULSE.</p>
+                </div>
+                <label class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-200">
+                  <input type="checkbox" name="store_document" checked class="rounded border-slate-300" />
+                  Сохранить исходный документ в документы пациента
+                </label>
+              </div>
+
+              <div class="space-y-5">
+                {% for group in payload.result.grouped_candidates %}
+                  <section class="rounded-[1.75rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+                    <div class="mb-4 flex items-center justify-between gap-3">
+                      <div>
+                        <h3 class="text-lg font-semibold text-slate-900">{{ group["name"] }}</h3>
+                        <p class="mt-1 text-sm text-slate-500">Группа сформирована backend-логикой на основе типа показателя и лабораторной панели.</p>
+                      </div>
+                      <div class="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">{{ group["items"]|length }} шт.</div>
+                    </div>
+
+                    <div class="space-y-4">
+                      {% for item in group["items"] %}
+                        {% set idx = item.candidate_index %}
+                        <div class="rounded-[1.5rem] bg-white p-4 ring-1 ring-slate-200">
+                          <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                            <label class="inline-flex items-start gap-3">
+                              <input type="checkbox" name="candidate_index" value="{{ idx }}" {% if item.confidence_score >= payload.confidence_threshold %}checked{% endif %} class="mt-1 rounded border-slate-300" />
+                              <span>
+                                <span class="block text-base font-semibold text-slate-900">{{ "Давление" if item.kind == "blood_pressure" else item.value.test_name }}</span>
+                                <span class="mt-1 block text-xs leading-5 text-slate-500">
+                                  confidence {{ item.confidence_score }}{% if item.extraction_method %} • {{ item.extraction_method }}{% endif %} • {{ item.source_line }}
+                                </span>
+                                {% if item.cell_confidence %}
+                                  <span class="mt-1 block text-[11px] leading-5 text-slate-500">
+                                    По ячейкам:
+                                    {% for cell_name, score in item.cell_confidence.items() %}
+                                      {{ cell_name }}={{ score }}{% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                  </span>
+                                {% endif %}
+                              </span>
+                            </label>
+                            <div class="rounded-full px-3 py-1 text-xs font-semibold {% if item.confidence_score >= payload.confidence_threshold %}bg-emerald-100 text-emerald-800{% elif item.confidence_score >= 0.65 %}bg-amber-100 text-amber-800{% else %}bg-rose-100 text-rose-800{% endif %}">
+                              {% if item.confidence_score >= payload.confidence_threshold %}Автовыбор{% elif item.confidence_score >= 0.65 %}Проверить внимательно{% else %}Низкая уверенность{% endif %}
+                            </div>
+                          </div>
+
+                          {% if item.kind == "blood_pressure" %}
+                            <div class="mt-4 grid gap-3 md:grid-cols-3">
+                              <label class="block rounded-[1.25rem] bg-slate-50 p-3 ring-1 ring-slate-200">
+                                <span class="mb-1 block text-sm font-medium text-slate-600">SYS</span>
+                                <input type="number" name="candidate_{{ idx }}_sys" value="{{ item.value.sys }}" placeholder="SYS" class="w-full rounded-2xl border-slate-300 bg-white" />
+                              </label>
+                              <label class="block rounded-[1.25rem] bg-slate-50 p-3 ring-1 ring-slate-200">
+                                <span class="mb-1 block text-sm font-medium text-slate-600">DIA</span>
+                                <input type="number" name="candidate_{{ idx }}_dia" value="{{ item.value.dia }}" placeholder="DIA" class="w-full rounded-2xl border-slate-300 bg-white" />
+                              </label>
+                              <label class="block rounded-[1.25rem] bg-slate-50 p-3 ring-1 ring-slate-200">
+                                <span class="mb-1 block text-sm font-medium text-slate-600">PULSE</span>
+                                <input type="number" name="candidate_{{ idx }}_pulse" value="{{ item.value.pulse or '' }}" placeholder="PULSE" class="w-full rounded-2xl border-slate-300 bg-white" />
+                              </label>
+                            </div>
+                          {% else %}
+                            <div class="mt-4 grid gap-3 lg:grid-cols-2">
+                              <label class="block rounded-[1.25rem] bg-slate-50 p-3 ring-1 ring-slate-200">
+                                <span class="mb-1 block text-sm font-medium text-slate-600">Лабораторная панель</span>
+                                <input name="candidate_{{ idx }}_panel_name" value="{{ item.value.panel_name or '' }}" placeholder="Например, ОАК или Биохимия" class="w-full rounded-2xl border-slate-300 bg-white" />
+                              </label>
+                              <label class="block rounded-[1.25rem] bg-slate-50 p-3 ring-1 ring-slate-200">
+                                <span class="mb-1 block text-sm font-medium text-slate-600">Показатель</span>
+                                <input name="candidate_{{ idx }}_test_name" value="{{ item.value.test_name }}" placeholder="Показатель" class="w-full rounded-2xl border-slate-300 bg-white" />
+                              </label>
+                              <label class="block rounded-[1.25rem] bg-slate-50 p-3 ring-1 ring-slate-200">
+                                <span class="mb-1 block text-sm font-medium text-slate-600">Значение</span>
+                                <input type="number" step="0.01" name="candidate_{{ idx }}_value" value="{{ item.value.value }}" placeholder="Значение" class="w-full rounded-2xl border-slate-300 bg-white" />
+                              </label>
+                              <label class="block rounded-[1.25rem] bg-slate-50 p-3 ring-1 ring-slate-200">
+                                <span class="mb-1 block text-sm font-medium text-slate-600">Единицы</span>
+                                <input name="candidate_{{ idx }}_unit" value="{{ item.value.unit or '' }}" placeholder="Единицы" class="w-full rounded-2xl border-slate-300 bg-white" />
+                              </label>
+                            </div>
+                            {% if item.value.reference_text or item.value.reference_low is not none or item.value.reference_high is not none %}
+                              <div class="mt-3 rounded-[1.25rem] bg-emerald-50 px-4 py-3 text-sm text-emerald-700 ring-1 ring-emerald-200">
+                                {% if item.value.reference_text %}
+                                  Референс из документа: {{ item.value.reference_text }}
+                                {% else %}
+                                  Референс из документа: {% if item.value.reference_low is not none %}{{ item.value.reference_low }}{% endif %}{% if item.value.reference_high is not none %} - {{ item.value.reference_high }}{% endif %} {{ item.value.unit or "" }}
+                                {% endif %}
+                              </div>
+                            {% endif %}
+                          {% endif %}
+                        </div>
+                      {% else %}
+                        <div class="rounded-[1.5rem] border border-dashed border-slate-300 px-4 py-8 text-sm text-slate-500">В этой группе пока ничего не найдено.</div>
+                      {% endfor %}
+                    </div>
+                  </section>
+                {% else %}
+                  <div class="rounded-[1.75rem] border border-dashed border-slate-300 px-4 py-10 text-center text-sm text-slate-500">
+                    Ничего не найдено для импорта. Попробуйте другой файл или более качественное фото, особенно если документ был снят под углом или при слабом свете.
+                  </div>
+                {% endfor %}
+              </div>
+            </article>
+
+            <div class="flex flex-wrap gap-3">
+              <button type="submit" class="rounded-2xl bg-slate-900 px-5 py-4 text-sm font-semibold text-white">Сохранить выбранные значения</button>
+              <a href="/?selected_patient_id={{ patient.id }}" class="rounded-2xl border border-slate-300 px-5 py-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">Отменить и вернуться в карту</a>
+            </div>
+          </form>
+        </section>
+      </section>
+    </div>
+  </main>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page">
+    <section class="hero">
+      <div class="hero-header">
+        <div>
+          <h1>Printable summary очереди уведомлений</h1>
+          <p class="muted">Короткая печатная сводка для self-hosted администратора.</p>
+        </div>
+        <a class="btn-secondary btn-link" href="/account/worker-monitor">Назад</a>
+      </div>
+    </section>
+
+    <section class="card stack">
+      <div><strong>Основной worker:</strong> {{ worker_health.status }}</div>
+      <div><strong>Worker pool:</strong> {{ worker_pool.status }} • {{ worker_pool.count }} инстансов</div>
+      <div><strong>Очередь:</strong> {{ queue_stats.queued }} • застрявшие {{ queue_stats.stale }} • max attempts {{ queue_stats.max_attempts }}</div>
+      <div><strong>Retention-инциденты:</strong> {{ retention_summary.total }}</div>
+      <div><strong>Активных инцидентов сейчас:</strong> {{ incidents|length }}</div>
+    </section>
+
+    <section class="card stack">
+      <h2>Быстрая сводка диагностики</h2>
+      {% for item in operational_alerts %}
+        <div>{{ item }}</div>
+      {% else %}
+        <p class="muted">Критичных operational-проблем сейчас не видно.</p>
+      {% endfor %}
+    </section>
+
+    <section class="card stack">
+      <h2>Деградация каналов</h2>
+      {% for item in degradation_warnings %}
+        <div>{{ item }}</div>
+      {% else %}
+        <p class="muted">За период выраженной деградации не найдено.</p>
+      {% endfor %}
+    </section>
+
+    <section class="card stack">
+      <h2>SLA-alerts</h2>
+      {% for item in sla_alerts %}
+        <div>{{ item }}</div>
+      {% else %}
+        <p class="muted">Операционных SLA-нарушений сейчас нет.</p>
+      {% endfor %}
+    </section>
+
+    <section class="card stack">
+      <h2>Printable-runbook</h2>
+      {% for item in admin_runbook %}
+        <div>{{ item }}</div>
+      {% else %}
+        <p class="muted">Дополнительных действий сейчас не требуется.</p>
+      {% endfor %}
+    </section>
+
+    <section class="card stack">
+      <h2>Типовые self-hosted инциденты</h2>
+      <div><strong>SMTP:</strong> проверьте пароль приложения, исходящий порт, TLS и не блокирует ли провайдер отправку.</div>
+      <div><strong>Telegram:</strong> убедитесь, что bot token живой, chat id корректный и бот не упёрся в rate limit.</div>
+      <div><strong>Matrix:</strong> проверьте homeserver, access token, bot /sync и сохраняется ли связанный room_id.</div>
+      <div><strong>Очередь повторов:</strong> если stale-задачи растут, снимите diagnostics bundle и проверьте один ли канал ломается чаще остальных.</div>
+      <div><strong>Диагностика self-hosted:</strong> сначала снимите printable summary, затем diagnostics bundle, после этого сравните историю инцидентов по каналам за 14 дней.</div>
+    </section>
+  </main>
+{% endblock %}

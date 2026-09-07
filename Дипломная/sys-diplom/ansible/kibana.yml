@@ -1,0 +1,38 @@
+- name: Deploy Kibana
+  hosts: kibana
+  become: true
+
+  tasks:
+    - name: Create Kibana directory
+      ansible.builtin.file:
+        path: /opt/kibana
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Create Kibana compose file
+      ansible.builtin.copy:
+        dest: /opt/kibana/compose.yaml
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          services:
+            kibana:
+              image: docker.elastic.co/kibana/kibana:9.5.3
+              container_name: kibana
+              restart: unless-stopped
+
+              environment:
+                - SERVER_HOST=0.0.0.0
+                - ELASTICSEARCH_HOSTS=http://elasticsearch.ru-central1.internal:9200
+
+              ports:
+                - "5601:5601"
+
+    - name: Start Kibana
+      ansible.builtin.command:
+        cmd: docker compose up -d
+        chdir: /opt/kibana
+      changed_when: true

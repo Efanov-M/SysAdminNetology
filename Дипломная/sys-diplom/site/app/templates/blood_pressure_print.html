@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page print-page">
+    <section class="hero print-hide">
+      <div class="hero-header">
+        <div>
+          <h1>Дневник давления</h1>
+          <p class="muted">{{ patient.name }}</p>
+        </div>
+        <div class="inline">
+          <button type="button" onclick="window.print()">Печать</button>
+          <a class="btn-secondary btn-link" href="/">Назад</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Последние измерения</h2>
+      <div class="list">
+        {% for item in observations %}
+          <div class="list-item">
+            <div><strong>{{ item.created_at.strftime("%d.%m.%Y %H:%M") }}</strong></div>
+            <div>{{ item.value.sys }}/{{ item.value.dia }} мм рт. ст.</div>
+            {% if item.value.pulse %}<div class="small">Пульс: {{ item.value.pulse }}</div>{% endif %}
+          </div>
+        {% else %}
+          <p class="muted">Нет измерений давления.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+{% endblock %}

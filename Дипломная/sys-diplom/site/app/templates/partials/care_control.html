@@ -1,0 +1,174 @@
+<article class="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+  <div class="mb-4">
+    <h2 class="text-xl font-semibold text-slate-900">Планирование</h2>
+    <p class="mt-1 text-sm text-slate-700">Здесь только то, что запланировано: напоминания и визиты. Настройки уведомлений вынесены в аккаунт.</p>
+  </div>
+
+  {% if selected_patient %}
+    <section class="mb-4 rounded-[1.5rem] bg-rose-50 p-4 ring-1 ring-rose-100">
+      <h3 class="text-lg font-semibold text-slate-900">Экстренный сигнал</h3>
+      <p class="mt-2 text-sm leading-6 text-slate-800">Кнопка “Мне плохо” сразу отправляет сигнал родственнику. Это отдельный простой сценарий без порогов и сложных настроек.</p>
+      <div class="mt-4 grid gap-3 sm:grid-cols-2">
+        <form method="post" action="/patients/{{ selected_patient.id }}/emergency" class="space-y-2">
+          <input type="hidden" name="status_kind" value="bad" />
+          <button type="submit" {% if not signal_actions_enabled %}disabled{% endif %} class="w-full rounded-2xl bg-rose-600 px-4 py-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-rose-200 disabled:text-rose-700">
+            Мне плохо
+          </button>
+          {% if not signal_actions_enabled %}
+            <a href="/account" class="inline-flex w-full items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700">Перейти в настройки</a>
+          {% endif %}
+        </form>
+        <form method="post" action="/patients/{{ selected_patient.id }}/status">
+          <input type="hidden" name="status_kind" value="ok" />
+          <button type="submit" class="w-full rounded-2xl border border-slate-300 px-4 py-4 text-sm font-semibold text-slate-700 hover:bg-white">
+            Я в порядке
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <section class="mb-4 rounded-[1.5rem] {% if matrix_connected %}bg-emerald-50 ring-emerald-100{% else %}bg-amber-50 ring-amber-100{% endif %} p-4 ring-1">
+      <h3 class="text-lg font-semibold text-slate-900">Matrix</h3>
+      <p class="mt-2 text-sm leading-6 text-slate-800">
+        {% if signal_actions_enabled %}
+          Подключен. Сигналы и уведомления можно отправлять родственникам через Matrix.
+        {% else %}
+          Не подключен. Чтобы отправлять сигнал, подключите Matrix.
+        {% endif %}
+      </p>
+      {% if not signal_actions_enabled %}
+        <a href="/account" class="mt-3 inline-flex items-center justify-center rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-600">Перейти в настройки</a>
+      {% endif %}
+    </section>
+
+    <div class="grid gap-4 lg:grid-cols-2">
+      <section class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+        <h3 class="text-lg font-semibold text-slate-900">Напоминания</h3>
+        <p class="mt-1 text-sm text-slate-700">Короткая форма: что сделать, когда и как часто повторять.</p>
+        {% if selected_patient_can_edit %}
+          <form method="post" action="/patients/{{ selected_patient.id }}/reminders" class="mt-4 space-y-3">
+            <input name="title" required placeholder="Что сделать, например Измерить давление" class="w-full rounded-2xl border-slate-300 bg-white" />
+            <select name="reminder_type" class="w-full rounded-2xl border-slate-300 bg-white">
+              <option value="medication">Приём лекарства</option>
+              <option value="blood_pressure">Измерение давления</option>
+              <option value="blood_sugar">Измерение сахара</option>
+              <option value="doctor_visit">Посещение врача</option>
+            </select>
+            <input type="time" name="time_of_day" required class="w-full rounded-2xl border-slate-300 bg-white" />
+            <select name="repeat_mode" class="w-full rounded-2xl border-slate-300 bg-white">
+              <option value="daily">Каждый день</option>
+              <option value="once">Один раз</option>
+              <option value="weekly">Раз в неделю</option>
+            </select>
+            <input type="date" name="one_time_date" class="w-full rounded-2xl border-slate-300 bg-white" />
+            <div class="rounded-xl bg-white px-4 py-3 text-sm text-slate-700 ring-1 ring-slate-200">Доступны только простые повторы: каждый день, один раз или раз в неделю.</div>
+            <button type="submit" class="rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-600">Сохранить напоминание</button>
+          </form>
+        {% else %}
+          <p class="mt-3 text-sm text-slate-700">В режиме просмотра можно видеть напоминания, но нельзя их менять.</p>
+        {% endif %}
+        <div class="mt-4 space-y-2">
+          {% for reminder in patient_reminders %}
+            <div class="rounded-xl bg-white px-3 py-3 ring-1 ring-slate-200">
+              <div class="font-medium text-slate-900">{{ reminder.title }}</div>
+              <div class="text-sm text-slate-500">{{ reminder.reminder_type }} • {{ reminder.time_of_day.strftime("%H:%M") }}</div>
+              <div class="mt-2 grid grid-cols-2 gap-2">
+                <form method="post" action="/patients/{{ selected_patient.id }}/reminders/{{ reminder.id }}/done">
+                  <input type="hidden" name="return_to" value="planner" />
+                  <button type="submit" class="w-full rounded-2xl bg-teal-700 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-600">Сделано</button>
+                </form>
+                <form method="post" action="/patients/{{ selected_patient.id }}/reminders/{{ reminder.id }}/snooze">
+                  <input type="hidden" name="return_to" value="planner" />
+                  <input type="hidden" name="hours" value="1" />
+                  <button type="submit" class="w-full rounded-2xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">Отложить</button>
+                </form>
+              </div>
+            </div>
+          {% else %}
+            <p class="text-sm text-slate-700">Напоминаний пока нет.</p>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+        <h3 class="text-lg font-semibold text-slate-900">Визиты к врачу</h3>
+        <p class="mt-1 text-sm text-slate-700">Вертикальная форма без перегрузки: врач, дата и место.</p>
+        {% if selected_patient_can_edit %}
+          <form method="post" action="/patients/{{ selected_patient.id }}/events" data-offline-form="event" class="mt-4 space-y-3">
+            <input name="title" placeholder="Врач, например Кардиолог" class="w-full rounded-2xl border-slate-300 bg-white" />
+            <input type="datetime-local" name="scheduled_at" required class="w-full rounded-2xl border-slate-300 bg-white" />
+            <input name="doctor" placeholder="Врач" class="w-full rounded-2xl border-slate-300 bg-white" />
+            <input name="place" placeholder="Место" class="w-full rounded-2xl border-slate-300 bg-white" />
+            <textarea name="comment" placeholder="Комментарий" class="w-full rounded-2xl border-slate-300 bg-white"></textarea>
+            <button type="submit" class="rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-600">Сохранить визит</button>
+            <a href="/patients/{{ selected_patient.id }}/events.ics" class="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Экспорт в календарь</a>
+          </form>
+        {% else %}
+          <div class="mt-3">
+            <a href="/patients/{{ selected_patient.id }}/events.ics" class="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Экспорт в календарь</a>
+          </div>
+        {% endif %}
+        <div class="mt-4 space-y-2">
+          {% for event in patient_events %}
+            <div class="rounded-xl bg-white px-3 py-3 ring-1 ring-slate-200">
+              <div class="font-medium text-slate-900">{{ event.title }}</div>
+              <div class="text-sm text-slate-500">{{ event.scheduled_at.strftime("%d.%m.%Y %H:%M") }}{% if event.doctor %} • {{ event.doctor }}{% endif %}</div>
+              <div class="text-sm text-slate-500">{% if event.place %}{{ event.place }}{% else %}Место не указано{% endif %}</div>
+              <div class="mt-2 grid grid-cols-2 gap-2">
+                <form method="post" action="/patients/{{ selected_patient.id }}/events/{{ event.id }}/done">
+                  <input type="hidden" name="return_to" value="planner" />
+                  <button type="submit" class="w-full rounded-2xl bg-teal-700 px-3 py-2 text-sm font-semibold text-white hover:bg-teal-600">Сделано</button>
+                </form>
+                <form method="post" action="/patients/{{ selected_patient.id }}/events/{{ event.id }}/snooze">
+                  <input type="hidden" name="return_to" value="planner" />
+                  <input type="hidden" name="hours" value="1" />
+                  <button type="submit" class="w-full rounded-2xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">Отложить</button>
+                </form>
+              </div>
+            </div>
+          {% else %}
+            <p class="text-sm text-slate-700">Событий пока нет.</p>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+
+    <section class="mt-4 rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+      <h3 class="text-lg font-semibold text-slate-900">Простые выводы</h3>
+      <div class="mt-3 space-y-2">
+        {% for insight in simple_insights %}
+          <div class="rounded-xl bg-white px-3 py-3 text-sm text-slate-700 ring-1 ring-slate-200">{{ insight }}</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="mt-4 rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+      <h3 class="text-lg font-semibold text-slate-900">Последние отметки</h3>
+      <div class="mt-3 space-y-2">
+        {% for item in patient_checkins %}
+          <div class="rounded-xl bg-white px-3 py-3 ring-1 ring-slate-200">
+            <div class="font-medium text-slate-900">
+              {% if item.checkin_type == "medication_taken" %}
+                Приём лекарств отмечен
+              {% elif item.checkin_type == "feeling_bad" %}
+                Сигнал “Мне плохо”
+              {% elif item.checkin_type == "feeling_ok" %}
+                Сигнал “Я в порядке”
+              {% else %}
+                {{ item.checkin_type }}
+              {% endif %}
+            </div>
+            <div class="text-sm text-slate-500">{{ item.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+            {% if item.details and item.details.note %}
+              <div class="mt-1 text-sm text-slate-600">{{ item.details.note }}</div>
+            {% endif %}
+          </div>
+        {% else %}
+          <p class="text-sm text-slate-700">Отметок пока нет.</p>
+        {% endfor %}
+      </div>
+    </section>
+  {% else %}
+    <p class="text-sm text-slate-700">Сначала выберите пациента.</p>
+  {% endif %}
+</article>

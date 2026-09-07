@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page print-page">
+    <section class="hero print-hide">
+      <div class="hero-header">
+        <div>
+          <h1>Детская карточка для печати</h1>
+          <p class="muted">{{ patient.name }} • {{ layout }}</p>
+        </div>
+        <div class="inline">
+          <button type="button" onclick="window.print()">Печать</button>
+          <a class="btn-secondary btn-link" href="/">Назад</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>{{ patient.name }}</h2>
+      <p>Дата рождения: {{ patient.date_of_birth or "не указана" }}</p>
+      <p>{{ patient.notes or "Без дополнительных заметок" }}</p>
+        <div class="inline print-hide">
+          <a class="btn-secondary btn-link" href="/patients/{{ patient.id }}/print/child?layout=school_trip">Школа / поездка</a>
+          <a class="btn-secondary btn-link" href="/patients/{{ patient.id }}/print/child?layout=temperature_journal">Журнал температуры</a>
+          <a class="btn-secondary btn-link" href="/patients/{{ patient.id }}/print/child?layout=vaccination_card">Карточка вакцинации</a>
+          <a class="btn-secondary btn-link" href="/patients/{{ patient.id }}/print/child?layout=long_observation">Длительное наблюдение</a>
+          <a class="btn-secondary btn-link" href="/patients/{{ patient.id }}/print/child?layout=adult_transfer">Передача родственнику</a>
+          <a class="btn-secondary btn-link" href="/patients/{{ patient.id }}/print/child?layout=school_week">Школьная неделя</a>
+          <a class="btn-secondary btn-link" href="/patients/{{ patient.id }}/print/child?layout=adult_long_route">Длинный маршрут наблюдения</a>
+        </div>
+      </section>
+
+    <section class="legacy-grid">
+      <article class="card">
+        <h2>{% if layout == "temperature_journal" %}Журнал температуры{% elif layout == "vaccination_card" %}Краткая карточка вакцинации{% elif layout == "long_observation" %}Пакет длительного наблюдения{% elif layout == "adult_transfer" %}Передача сменяющемуся родственнику{% elif layout == "school_week" %}Недельный пакет для школы{% elif layout == "adult_long_route" %}Длительный маршрут наблюдения{% else %}Школа / поездка{% endif %}</h2>
+        <div class="list">
+          {% if layout == "temperature_journal" %}
+            {% for event in health_events[:10] %}
+              <div class="list-item">
+                <strong>{{ event.date.strftime("%d.%m.%Y") }}</strong>
+                <div>{{ event.temperature or "—" }} °C</div>
+                <div class="small">{{ event.symptoms or event.comment or "Без комментария" }}</div>
+              </div>
+            {% else %}
+              <p class="muted">Температурных записей пока нет.</p>
+            {% endfor %}
+          {% elif layout == "vaccination_card" %}
+            {% for vaccine in vaccines[:10] %}
+              <div class="list-item">
+                <strong>{{ vaccine.name }}</strong>
+                <div>{{ vaccine.date or "дата не указана" }}</div>
+                <div class="small">{{ "Сделана" if vaccine.status == "done" else "Планируется" }}</div>
+              </div>
+            {% else %}
+              <p class="muted">Записей о вакцинации пока нет.</p>
+            {% endfor %}
+          {% elif layout == "long_observation" %}
+            {% for event in health_events[:10] %}
+              <div class="list-item">
+                <strong>{{ event.date.strftime("%d.%m.%Y") }}</strong>
+                <div>Температура: {{ event.temperature or "—" }} °C</div>
+                <div class="small">{{ event.symptoms or event.comment or "Без дополнительных симптомов" }}</div>
+              </div>
+            {% else %}
+              <p class="muted">Событий наблюдения пока нет.</p>
+            {% endfor %}
+          {% elif layout == "school_week" %}
+            {% for medication in child_medications[:7] %}
+              <div class="list-item">
+                <strong>{{ medication.name }}</strong>
+                <div>{{ medication.dosage or "Без дозировки" }}</div>
+                <div class="small">{{ medication.comment or "Для школы, секции или кружка" }}</div>
+              </div>
+            {% else %}
+              <p class="muted">Лекарств для школьной недели пока нет.</p>
+            {% endfor %}
+          {% elif layout == "adult_long_route" %}
+            {% for event in health_events[:10] %}
+              <div class="list-item">
+                <strong>{{ event.date.strftime("%d.%m.%Y") }}</strong>
+                <div>Температура: {{ event.temperature or "—" }} °C</div>
+                <div class="small">{{ event.symptoms or event.comment or "Нужен спокойный бытовой контроль" }}</div>
+              </div>
+            {% else %}
+              <p class="muted">Событий длительного наблюдения пока нет.</p>
+            {% endfor %}
+          {% else %}
+            {% for vaccine in vaccines[:5] %}
+              <div class="list-item">
+                <strong>{{ vaccine.name }}</strong>
+                <div>{{ vaccine.date or "дата не указана" }}</div>
+                <div class="small">{{ "Сделана" if vaccine.status == "done" else "Планируется" }}</div>
+              </div>
+            {% else %}
+              <p class="muted">Краткой медицинской сводки пока нет.</p>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>{% if layout in ["adult_transfer", "adult_long_route"] %}Что важно передать родственнику{% else %}Последний рост и вес{% endif %}</h2>
+        <div class="list">
+          {% if layout in ["adult_transfer", "adult_long_route"] %}
+            <div class="list-item">
+              <strong>Контакты и важные ориентиры</strong>
+              <div>{{ patient.notes or "Добавьте короткую заметку о режиме ребёнка, лекарствах и контактах." }}</div>
+            </div>
+            {% for event in health_events[:4] %}
+              <div class="list-item">
+                <strong>{{ event.date.strftime("%d.%m.%Y") }}</strong>
+                <div>{{ event.symptoms or "Событие здоровья" }}</div>
+                <div class="small">{{ event.comment or "Без комментария" }}</div>
+              </div>
+            {% else %}
+              <p class="muted">Недавних событий пока нет.</p>
+            {% endfor %}
+          {% else %}
+            {% for item in growth_records[:5] %}
+              <div class="list-item">
+                <strong>{{ item.date.strftime("%d.%m.%Y") }}</strong>
+                <div>Рост: {{ item.height or "—" }} см</div>
+                <div>Вес: {{ item.weight or "—" }} кг</div>
+              </div>
+            {% else %}
+              <p class="muted">Записей пока нет.</p>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </article>
+    </section>
+  </main>
+{% endblock %}

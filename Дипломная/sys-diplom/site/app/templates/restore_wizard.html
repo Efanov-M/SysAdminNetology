@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page">
+    <section class="hero">
+      <div class="hero-header">
+        <div>
+          <h1>Restore Wizard</h1>
+          <p class="muted">Проверьте конфликты и выберите действие до применения резервной копии.</p>
+        </div>
+        <a class="btn-secondary btn-link" href="/">Назад</a>
+      </div>
+    </section>
+
+    <section class="card stack">
+      <div class="list">
+        <div class="list-item"><strong>Пациентов в архиве:</strong> {{ preview.summary.incoming_patients }}</div>
+        <div class="list-item"><strong>Совпавших пациентов:</strong> {{ preview.summary.matched_patients }}</div>
+        <div class="list-item"><strong>Новых лекарств:</strong> {{ preview.summary.new_medications }}</div>
+        <div class="list-item"><strong>Дубликатов документов:</strong> {{ preview.summary.duplicate_documents }}</div>
+      </div>
+    </section>
+
+    <form method="post" action="/backup/restore/wizard/{{ preview_id }}/apply" class="stack">
+      <input type="hidden" name="restore_mode" value="{{ restore_mode }}" />
+      {% for patient in preview.patients %}
+        <section class="card stack">
+          <div>
+            <h2>{{ patient.name }}</h2>
+            <p class="muted">{{ patient.date_of_birth or "Дата рождения не указана" }}</p>
+            <p class="small muted">{{ patient.comparison_note }}</p>
+          </div>
+          <div class="field">
+            <label>Действие для пациента</label>
+            <input type="hidden" name="patient_key" value="{{ patient.key }}" />
+            <select name="patient_action">
+              {% for action in patient.available_actions %}
+                <option value="{{ action }}" {% if action == patient.default_action %}selected{% endif %}>{{ action }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          {% if patient.medications %}
+            <div class="list">
+              {% for medication in patient.medications %}
+                <div class="list-item">
+                  <div><strong>Лекарство:</strong> {{ medication.name }}{% if medication.dosage %}, {{ medication.dosage }}{% endif %}</div>
+                  <div class="small muted">Статус: {{ medication.status }}</div>
+                  <div class="small">{{ medication.comparison_note }}</div>
+                  {% if medication.current %}
+                    <div class="small muted">Сейчас: {{ medication.current.name }}{% if medication.current.dosage %}, {{ medication.current.dosage }}{% endif %}{% if medication.current.schedule %}, {{ medication.current.schedule }}{% endif %}</div>
+                  {% endif %}
+                  <div class="small muted">Из архива: {{ medication.incoming.name }}{% if medication.incoming.dosage %}, {{ medication.incoming.dosage }}{% endif %}{% if medication.incoming.schedule %}, {{ medication.incoming.schedule }}{% endif %}</div>
+                  <input type="hidden" name="medication_key" value="{{ medication.key }}" />
+                  <select name="medication_action">
+                    {% for action in medication.available_actions %}
+                      <option value="{{ action }}" {% if action == medication.default_action %}selected{% endif %}>{{ action }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if patient.documents %}
+            <div class="list">
+              {% for document in patient.documents %}
+                <div class="list-item">
+                  <div><strong>Документ:</strong> {{ document.original_filename or "PDF" }}</div>
+                  <div class="small muted">Статус: {{ document.status }}</div>
+                  <div class="small">{{ document.comparison_note }}</div>
+                  {% if document.current %}
+                    <div class="small muted">Сейчас: {{ document.current.original_filename }}{% if document.current.description %} • {{ document.current.description }}{% endif %}</div>
+                  {% endif %}
+                  <div class="small muted">Из архива: {{ document.incoming.original_filename }}{% if document.incoming.description %} • {{ document.incoming.description }}{% endif %}</div>
+                  <input type="hidden" name="document_key" value="{{ document.key }}" />
+                  <select name="document_action">
+                    {% for action in document.available_actions %}
+                      <option value="{{ action }}" {% if action == document.default_action %}selected{% endif %}>{{ action }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if patient.observation_conflicts %}
+            <div class="list">
+              {% for item in patient.observation_conflicts %}
+                <div class="list-item">
+                  <div><strong>Показатель:</strong> {{ item.type }}</div>
+                  <div class="small">{{ item.comparison_note }}</div>
+                  <div class="small muted">Сейчас: {{ item.current }}</div>
+                  <div class="small muted">Из архива: {{ item.incoming }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {% if patient.lab_conflicts %}
+            <div class="list">
+              {% for item in patient.lab_conflicts %}
+                <div class="list-item">
+                  <div><strong>Анализ:</strong> {{ item.test_name }}</div>
+                  <div class="small">{{ item.comparison_note }}</div>
+                  <div class="small muted">Сейчас: {{ item.current }}</div>
+                  <div class="small muted">Из архива: {{ item.incoming }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </section>
+      {% endfor %}
+
+      <button type="submit">Применить restore</button>
+    </form>
+  </main>
+{% endblock %}

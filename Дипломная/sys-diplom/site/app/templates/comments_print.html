@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page">
+    <section class="hero">
+      <div class="hero-header">
+        <div>
+          <h1>Журнал комментариев для печати</h1>
+          <p class="muted">
+            {% if layout == "doctor" %}
+              Подборка заметок для визита к врачу.
+            {% elif layout == "home" %}
+              Домашняя версия журнала для хранения на бумаге.
+            {% else %}
+              Короткая printable-версия семейных заметок.
+            {% endif %}
+          </p>
+        </div>
+        <a class="btn-secondary btn-link" href="/comments">Назад</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="list">
+        {% for item in entries %}
+          <div class="list-item">
+            <div><strong>{{ item.patient_name }}</strong> • {{ item.category }}{% if item.pinned %} • закреплено{% endif %}</div>
+            <div class="small">{{ item.author_email }} • {{ item.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+            <div>{{ item.text }}</div>
+            {% if layout == "doctor" %}
+              <div class="small muted">Пациент ID: {{ item.patient_id }}</div>
+            {% elif layout == "home" %}
+              <div class="small muted">Эту заметку можно держать дома рядом с бумажной картой.</div>
+            {% elif layout == "emergency" %}
+              <div class="small muted">Короткая заметка для ситуации “вызов скорой”.</div>
+            {% elif layout == "trip" %}
+              <div class="small muted">Удобно взять с собой в поездку или на дачу.</div>
+            {% endif %}
+          </div>
+        {% else %}
+          <p class="muted">Записей для печати нет.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+{% endblock %}

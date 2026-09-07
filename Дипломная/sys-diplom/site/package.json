@@ -1,0 +1,18 @@
+{
+  "name": "family-phr-mvp-frontend",
+  "private": true,
+  "scripts": {
+    "build:tailwind": "tailwindcss -c tailwind.config.js -i ./app/static/tailwind.input.css -o ./app/static/tailwind.css --minify",
+    "build:vendor": "node ./scripts/build_frontend_assets.mjs",
+    "build:assets": "npm run build:tailwind && npm run build:vendor"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  },
+  "dependencies": {
+    "alpinejs": "^3.14.9",
+    "chart.js": "^4.5.0",
+    "chartjs-plugin-zoom": "^2.2.0",
+    "htmx.org": "^1.9.12"
+  }
+}

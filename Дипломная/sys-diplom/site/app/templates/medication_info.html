@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% from "partials/page_header.html" import page_header %}
+{% block body %}
+  <main class="min-h-screen bg-slate-100">
+    <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      {% set meds_home_href = ('/?selected_patient_id=' ~ selected_patient_id) if selected_patient_id else '/' %}
+      {% set meds_account_href = ('/account?selected_patient_id=' ~ selected_patient_id) if selected_patient_id else '/account' %}
+      {% call page_header("Препараты", "Поиск по препарату", "", True, meds_home_href, "/") %}
+        <a class="rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/25" href="/inbox">Inbox</a>
+        <a class="rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/25" href="{{ meds_account_href }}">Аккаунт</a>
+      {% endcall %}
+
+      <section class="mb-5 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <h2 class="text-lg font-semibold text-slate-900">Как пользоваться</h2>
+        <div class="mt-3 space-y-2 text-sm text-slate-600">
+          <p>Введите название препарата без дозировки. Лучше всего работают короткие варианты и международные названия.</p>
+          <p>Если препарат уже был найден раньше, результат откроется быстрее из локальной базы.</p>
+          <p>Кнопка «Обновить кэш» повторяет запрос к источнику и обновляет сохранённую карточку препарата.</p>
+        </div>
+      </section>
+
+      <section class="mb-5 rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <form method="get" action="/medications/search" class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto_auto] lg:items-end">
+          {% if selected_patient_id %}
+            <input type="hidden" name="selected_patient_id" value="{{ selected_patient_id }}" />
+          {% endif %}
+          <label class="block">
+            <span class="mb-2 block text-sm font-medium text-slate-600">Название препарата</span>
+            <input id="query" name="query" value="{{ query }}" placeholder="Например, лозартан или losartan" required class="w-full rounded-2xl border-slate-300 bg-slate-50" />
+          </label>
+          <button type="submit" class="rounded-2xl bg-teal-700 px-5 py-3 text-sm font-semibold text-white hover:bg-teal-600">Найти</button>
+          {% if query %}
+            <button type="submit" name="refresh" value="1" class="rounded-2xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Обновить кэш</button>
+          {% endif %}
+        </form>
+
+        {% if query and canonical_query and canonical_query != query.lower() %}
+          <div class="mt-4 rounded-[1.5rem] bg-cyan-50 px-4 py-3 text-sm text-cyan-800 ring-1 ring-cyan-200">
+            Поиск выполнен по синониму: <strong>{{ canonical_query }}</strong>
+          </div>
+        {% endif %}
+
+        {% if error %}
+          <div class="mt-4 rounded-[1.5rem] border px-4 py-4 text-sm {% if error_kind == 'timeout' %}border-amber-200 bg-amber-50 text-amber-800{% else %}border-rose-200 bg-rose-50 text-rose-700{% endif %}">
+            <div class="font-semibold">{{ error }}</div>
+            <div class="mt-2">
+              {% if error_kind == "timeout" %}
+                Попробуйте повторить запрос позже или введите международное название препарата.
+              {% else %}
+                Попробуйте международное название, пример запроса: `losartan`, `paracetamol`.
+              {% endif %}
+            </div>
+          </div>
+        {% elif error_kind == "not_found" and query %}
+          <div class="mt-4 rounded-[1.5rem] border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-700">
+            <div class="font-semibold text-slate-900">Ничего не найдено.</div>
+            <div class="mt-2">Попробуйте международное название, действующее вещество или более короткий вариант без дозировки.</div>
+          </div>
+        {% endif %}
+      </section>
+
+      <section class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+        <div class="space-y-4">
+          {% for item in items %}
+            <article class="rounded-[1.75rem] bg-slate-50 p-5 ring-1 ring-slate-200">
+              <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <h2 class="text-xl font-semibold text-slate-900">{{ item.brand_name }}</h2>
+                  {% if item.generic_name %}<div class="mt-1 text-sm text-slate-600">Действующее вещество: {{ item.generic_name }}</div>{% endif %}
+                </div>
+                {% if item.source %}
+                  <div class="rounded-full px-3 py-1 text-xs font-semibold {% if item.source == 'local_ru_directory' %}bg-emerald-100 text-emerald-700{% elif item.source == 'drug_cache' or item.from_cache %}bg-cyan-100 text-cyan-700{% else %}bg-slate-200 text-slate-700{% endif %}">
+                    {% if item.source == "local_ru_directory" %}
+                      локальный российский справочник
+                    {% elif item.source == "drug_cache" or item.from_cache %}
+                      локальная база
+                    {% else %}
+                      openFDA
+                    {% endif %}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {% if item.manufacturer %}
+                  <div class="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+                    <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Производитель</div>
+                    <div class="mt-2 text-sm text-slate-700">{{ item.manufacturer }}</div>
+                  </div>
+                {% endif %}
+                {% if item.common_dosages %}
+                  <div class="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+                    <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Типовые дозировки</div>
+                    <div class="mt-2 text-sm text-slate-700">{{ item.common_dosages|join(", ") }}</div>
+                  </div>
+                {% endif %}
+                {% if item.pediatric_forms %}
+                  <div class="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+                    <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Детские формы</div>
+                    <div class="mt-2 text-sm text-slate-700">{{ item.pediatric_forms|join(", ") }}</div>
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="mt-4 space-y-3 text-sm text-slate-700">
+                {% if item.purpose %}<div><strong class="text-slate-900">Для чего:</strong> {{ item.purpose }}</div>{% endif %}
+                {% if item.indications %}<div><strong class="text-slate-900">Когда применяют:</strong> {{ item.indications[:500] }}{% if item.indications|length > 500 %}...{% endif %}</div>{% endif %}
+                {% if item.instructions %}<div><strong class="text-slate-900">Кратко как принимают:</strong> {{ item.instructions[:500] }}{% if item.instructions|length > 500 %}...{% endif %}</div>{% endif %}
+                {% if item.contraindications %}<div><strong class="text-slate-900">Противопоказания:</strong> {{ item.contraindications[:500] }}{% if item.contraindications|length > 500 %}...{% endif %}</div>{% endif %}
+                {% if item.warnings %}<div class="rounded-[1.25rem] bg-amber-50 px-4 py-3 text-amber-800 ring-1 ring-amber-200"><strong>Предупреждения:</strong> {{ item.warnings[:500] }}{% if item.warnings|length > 500 %}...{% endif %}</div>{% endif %}
+              </div>
+            </article>
+          {% else %}
+            {% if query and not error %}
+              <div class="rounded-[1.75rem] border border-dashed border-slate-300 px-4 py-10 text-center text-sm text-slate-500">
+                Препарат пока не найден. Попробуйте международное название или поиск без дозировки.
+              </div>
+            {% else %}
+              <div class="rounded-[1.75rem] border border-dashed border-slate-300 px-4 py-10 text-center text-sm text-slate-500">
+                Введите название препарата, чтобы посмотреть справочную информацию и подсказки по поиску.
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </main>
+{% endblock %}

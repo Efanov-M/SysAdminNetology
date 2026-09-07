@@ -1,0 +1,166 @@
+<article id="medications-block" class="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-200">
+  <div class="border-b border-slate-200 p-5">
+    <h2 class="text-xl font-semibold text-slate-900">Назначения врача</h2>
+    <p class="mt-1 text-sm text-slate-500">Добавьте лекарство один раз, сохраните понятную инструкцию и при необходимости включите напоминание.</p>
+  </div>
+  {% if selected_patient_can_edit %}
+    <form
+      method="post"
+      action="/medications"
+      hx-post="/medications"
+      hx-target="#medications-block"
+      hx-swap="outerHTML"
+      hx-disabled-elt="button[type='submit']"
+      data-live-form="true"
+      data-offline-form="medication"
+      data-success-state="{% if request.headers.get('hx-request') == 'true' and message and not is_error %}true{% else %}false{% endif %}"
+      data-error-state="{% if request.headers.get('hx-request') == 'true' and message and is_error %}true{% else %}false{% endif %}"
+      class="grid gap-3 bg-slate-50 p-5"
+    >
+      <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+      <div class="text-sm font-semibold text-slate-900">Добавить назначение</div>
+      <div>
+        <input
+          id="med_name"
+          name="name"
+          required
+          placeholder="Название лекарства"
+          list="drug-cache-suggestions"
+          data-drug-suggest-url="/api/drugs/suggest"
+          data-drug-autofill-url="/api/drugs/autofill"
+          data-drug-instructions-target="#instructions"
+          data-drug-notes-target="#med_notes"
+          class="w-full rounded-2xl border-slate-300 bg-white {% if form_errors.get('name') %}border-rose-300 bg-rose-50{% endif %}"
+        />
+        <datalist id="drug-cache-suggestions"></datalist>
+        <div class="mt-2 text-xs text-slate-500">Начните вводить название. Если препарат уже искали раньше, система подскажет его из локальной базы.</div>
+        {% if form_errors.get("name") %}
+          <div class="mt-2 text-xs font-semibold text-rose-700">{{ form_errors.get("name") }}</div>
+        {% endif %}
+      </div>
+      <input id="dosage" name="dosage" placeholder="Дозировка, например 50 мг" class="w-full rounded-2xl border-slate-300 bg-white" />
+      <input id="schedule" name="schedule" placeholder="Когда принимать, например утром после еды" class="w-full rounded-2xl border-slate-300 bg-white" />
+      <textarea id="instructions" name="instructions" placeholder="Инструкция простыми словами: как принимать это лекарство" class="min-h-24 w-full rounded-2xl border-slate-300 bg-white"></textarea>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <input id="start_date" name="start_date" type="date" class="w-full rounded-2xl border-slate-300 bg-white" />
+        <input id="end_date" name="end_date" type="date" class="w-full rounded-2xl border-slate-300 bg-white" />
+      </div>
+      <label class="flex items-center gap-2 text-sm text-slate-700">
+        <input name="is_active" type="checkbox" checked class="rounded border-slate-300" />
+        Лекарство сейчас активно
+      </label>
+      <label class="flex items-center gap-2 text-sm text-slate-700">
+        <input name="reminder_enabled" type="checkbox" class="rounded border-slate-300" />
+        Напоминать каждый день
+      </label>
+      <div>
+        <input id="reminder_time" name="reminder_time" type="time" class="w-full rounded-2xl border-slate-300 bg-white {% if form_errors.get('reminder_time') %}border-rose-300 bg-rose-50{% endif %}" />
+        {% if form_errors.get("reminder_time") %}
+          <div class="mt-2 text-xs font-semibold text-rose-700">{{ form_errors.get("reminder_time") }}</div>
+        {% endif %}
+      </div>
+      <textarea id="med_notes" name="notes" placeholder="Заметки для семьи" class="w-full rounded-2xl border-slate-300 bg-white"></textarea>
+      <button type="submit" class="js-live-submit rounded-2xl bg-slate-900 px-4 py-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70">
+        <span class="js-live-idle">Сохранить назначение</span>
+        <span class="js-live-loading hidden items-center justify-center gap-2 text-sm font-medium">
+          <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+          Сохраняем...
+        </span>
+        <span class="js-live-success hidden">Сохранено</span>
+        <span class="js-live-error hidden">Проверьте поля</span>
+      </button>
+      <div class="js-live-status min-h-[1.25rem] text-center text-xs font-semibold text-slate-500"></div>
+    </form>
+  {% else %}
+    <p class="p-5 text-sm text-slate-500">В режиме просмотра можно читать назначения, но нельзя их менять.</p>
+  {% endif %}
+  {% if request.headers.get("hx-request") == "true" and message %}
+    <div class="mx-5 mt-4 rounded-2xl border px-4 py-3 text-sm {% if is_error %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-700{% endif %}">
+      {{ message }}
+    </div>
+  {% endif %}
+  <div class="space-y-3 p-5">
+    {% for med in medications %}
+      <details class="rounded-2xl border border-slate-200 p-4" {% if loop.first %}open{% endif %}>
+        <summary class="flex cursor-pointer list-none flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <div class="font-semibold text-slate-900">{{ med.name }}</div>
+              {% if med.is_active %}
+                <div class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800">Активно</div>
+              {% else %}
+                <div class="inline-flex rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-700">Отключено</div>
+              {% endif %}
+            </div>
+            <div class="mt-1 text-sm text-slate-600">{{ med.dosage or "Без дозировки" }}</div>
+            <div class="text-sm text-slate-500">{{ med.schedule or "Когда принимать не указано" }}</div>
+          </div>
+          <div class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">Открыть</div>
+        </summary>
+
+        <div class="mt-4 space-y-3">
+          {% if med.reminder_enabled and med.reminder_time %}
+            <div class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
+              Напоминание каждый день в {{ med.reminder_time.strftime("%H:%M") }}
+            </div>
+          {% endif %}
+
+          <form
+            method="post"
+            action="/patients/{{ selected_patient.id }}/medications/{{ med.id }}/taken"
+            hx-post="/patients/{{ selected_patient.id }}/medications/{{ med.id }}/taken"
+            hx-target="#medications-block"
+            hx-swap="outerHTML"
+            class="grid gap-2 sm:grid-cols-2"
+          >
+            <button type="submit" class="rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white">Подтвердить приём</button>
+            <a href="/patients/{{ selected_patient.id }}/print/medications?layout=today" class="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Что принимать сегодня</a>
+          </form>
+
+          <div class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+            <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Инструкция</div>
+            <div class="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-slate-800">{{ med.instructions or med.notes or "Инструкция пока не добавлена" }}</div>
+          </div>
+
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div class="rounded-[1.25rem] bg-slate-50 px-4 py-3 text-sm text-slate-700 ring-1 ring-slate-200">
+              <strong class="text-slate-900">Начало:</strong> {{ med.start_date.strftime("%d.%m.%Y") if med.start_date else "Не указано" }}
+            </div>
+            <div class="rounded-[1.25rem] bg-slate-50 px-4 py-3 text-sm text-slate-700 ring-1 ring-slate-200">
+              <strong class="text-slate-900">Окончание:</strong> {{ med.end_date.strftime("%d.%m.%Y") if med.end_date else "Без даты окончания" }}
+            </div>
+          </div>
+
+          {% if selected_patient_can_edit %}
+            <div class="grid gap-2 sm:grid-cols-2">
+              <form
+                method="post"
+                action="/medications/{{ med.id }}/toggle-active"
+                hx-post="/medications/{{ med.id }}/toggle-active"
+                hx-target="#medications-block"
+                hx-swap="outerHTML"
+              >
+                <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+                <button type="submit" class="w-full rounded-xl border border-slate-300 px-3 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                  {% if med.is_active %}Отключить{% else %}Снова включить{% endif %}
+                </button>
+              </form>
+              <form
+                method="post"
+                action="/medications/{{ med.id }}/delete"
+                hx-post="/medications/{{ med.id }}/delete"
+                hx-target="#medications-block"
+                hx-swap="outerHTML"
+              >
+                <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+                <button type="submit" class="w-full rounded-xl border border-slate-300 px-3 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Удалить</button>
+              </form>
+            </div>
+          {% endif %}
+        </div>
+      </details>
+    {% else %}
+      <p class="text-sm text-slate-500">Назначений пока нет. Добавьте назначение врача выше.</p>
+    {% endfor %}
+  </div>
+</article>

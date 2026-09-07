@@ -1,0 +1,181 @@
+<article class="space-y-4">
+  <section class="rounded-[1.75rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+    <p class="text-xs uppercase tracking-[0.3em] text-slate-500">Быстрый контроль</p>
+    <h2 class="mt-2 text-2xl font-semibold text-slate-900">Карта ребёнка</h2>
+    <a href="/simple?selected_patient_id={{ selected_patient.id }}" class="mt-4 inline-flex items-center justify-center rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white">
+      Открыть детский простой режим
+    </a>
+  </section>
+
+  {% if selected_patient_can_edit %}
+    <section class="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-xs uppercase tracking-[0.26em] text-slate-500">Быстрый ввод</p>
+          <h3 class="mt-2 text-xl font-semibold text-slate-900">Температура, рост, вес и прививки</h3>
+        </div>
+      </div>
+
+      <div class="mt-4 grid gap-4 xl:grid-cols-2">
+        <form method="post" action="/patients/{{ selected_patient.id }}/child-health-events" class="rounded-[1.5rem] bg-rose-50 p-4 ring-1 ring-rose-100">
+          <input type="hidden" name="next_url" value="/?selected_patient_id={{ selected_patient.id }}" />
+          <h4 class="text-lg font-semibold text-rose-900">Температура</h4>
+          <input name="temperature" type="number" step="0.1" inputmode="decimal" placeholder="°C" class="mt-4 w-full rounded-2xl border-rose-200 bg-white p-4 text-3xl font-semibold text-slate-900" />
+          <input name="symptoms" placeholder="Симптомы" class="mt-3 w-full rounded-2xl border-rose-200 bg-white p-4 text-base text-slate-900" />
+          <input name="comment" placeholder="Комментарий" class="mt-3 w-full rounded-2xl border-rose-200 bg-white p-4 text-base text-slate-900" />
+          <button type="submit" class="mt-4 w-full rounded-2xl bg-rose-600 px-4 py-3 text-base font-semibold text-white">
+            Сохранить температуру
+          </button>
+        </form>
+
+        <form method="post" action="/patients/{{ selected_patient.id }}/growth" class="rounded-[1.5rem] bg-teal-50 p-4 ring-1 ring-teal-100">
+          <input type="hidden" name="next_url" value="/?selected_patient_id={{ selected_patient.id }}" />
+          <h4 class="text-lg font-semibold text-teal-900">Рост и вес</h4>
+          <div class="mt-4 grid grid-cols-2 gap-3">
+            <input name="height" type="number" step="0.1" inputmode="decimal" placeholder="Рост, см" class="w-full rounded-2xl border-teal-200 bg-white p-4 text-xl font-semibold text-slate-900" />
+            <input name="weight" type="number" step="0.1" inputmode="decimal" placeholder="Вес, кг" class="w-full rounded-2xl border-teal-200 bg-white p-4 text-xl font-semibold text-slate-900" />
+          </div>
+          <button type="submit" class="mt-4 w-full rounded-2xl bg-teal-700 px-4 py-3 text-base font-semibold text-white">
+            Сохранить рост и вес
+          </button>
+        </form>
+
+        <form method="post" action="/patients/{{ selected_patient.id }}/vaccines" class="rounded-[1.5rem] bg-emerald-50 p-4 ring-1 ring-emerald-100">
+          <input type="hidden" name="next_url" value="/?selected_patient_id={{ selected_patient.id }}" />
+          <h4 class="text-lg font-semibold text-emerald-900">Прививка</h4>
+          <div class="mt-4 grid gap-3">
+            <input name="name" required placeholder="Название прививки" class="w-full rounded-2xl border-emerald-200 bg-white p-4 text-base text-slate-900" />
+            <input name="vaccine_date" type="date" class="w-full rounded-2xl border-emerald-200 bg-white p-4 text-base text-slate-900" />
+            <select name="status_value" class="w-full rounded-2xl border-emerald-200 bg-white p-4 text-base text-slate-900">
+              <option value="planned">Планируется</option>
+              <option value="done">Сделана</option>
+            </select>
+          </div>
+          <button type="submit" class="mt-4 w-full rounded-2xl bg-emerald-600 px-4 py-3 text-base font-semibold text-white">
+            Сохранить прививку
+          </button>
+        </form>
+
+        <form method="post" action="/patients/{{ selected_patient.id }}/child-medications" class="rounded-[1.5rem] bg-amber-50 p-4 ring-1 ring-amber-100">
+          <input type="hidden" name="next_url" value="/?selected_patient_id={{ selected_patient.id }}" />
+          <h4 class="text-lg font-semibold text-amber-900">Лекарство</h4>
+          <div class="mt-4 grid gap-3">
+            <input name="name" required placeholder="Название лекарства" class="w-full rounded-2xl border-amber-200 bg-white p-4 text-base text-slate-900" />
+            <input name="dosage" placeholder="Дозировка" class="w-full rounded-2xl border-amber-200 bg-white p-4 text-base text-slate-900" />
+            <input name="medication_date" type="date" class="w-full rounded-2xl border-amber-200 bg-white p-4 text-base text-slate-900" />
+          </div>
+          <button type="submit" class="mt-4 w-full rounded-2xl bg-amber-600 px-4 py-3 text-base font-semibold text-white">
+            Сохранить лекарство
+          </button>
+        </form>
+      </div>
+    </section>
+  {% endif %}
+
+  <section class="grid gap-4">
+    <article class="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-xs uppercase tracking-[0.26em] text-slate-500">Печать</p>
+          <h3 class="mt-2 text-xl font-semibold text-slate-900">Быстрые детские пакеты</h3>
+          <p class="mt-2 text-sm leading-6 text-slate-600">
+            Короткие printable/PDF-режимы для школы, поездки, температуры и вакцинации.
+          </p>
+        </div>
+      </div>
+      <div class="mt-4 grid gap-2">
+        <a href="/patients/{{ selected_patient.id }}/print/child?layout=school_trip" class="rounded-[1.25rem] bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-200">
+          Пакет для школы / поездки
+        </a>
+        <a href="/patients/{{ selected_patient.id }}/print/child?layout=temperature_journal" class="rounded-[1.25rem] bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-200">
+          Журнал температуры
+        </a>
+        <a href="/patients/{{ selected_patient.id }}/print/child?layout=vaccination_card" class="rounded-[1.25rem] bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-200">
+          Краткая карточка вакцинации
+        </a>
+        <a href="/patients/{{ selected_patient.id }}/print/child?layout=long_observation" class="rounded-[1.25rem] bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-200">
+          Пакет длительного наблюдения
+        </a>
+        <a href="/patients/{{ selected_patient.id }}/print/child?layout=adult_transfer" class="rounded-[1.25rem] bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-900 ring-1 ring-slate-200">
+          Передача родственнику
+        </a>
+      </div>
+    </article>
+
+    <article class="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-xs uppercase tracking-[0.26em] text-slate-500">Прививки</p>
+          <h3 class="mt-2 text-xl font-semibold text-slate-900">Последние записи</h3>
+        </div>
+        <a href="/extra?selected_patient_id={{ selected_patient.id }}&child_tab=vaccines" class="shrink-0 rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white">
+          Открыть прививки
+        </a>
+      </div>
+
+      {% if child_recent_vaccines %}
+        <div class="mt-4 space-y-2">
+          {% for item in child_recent_vaccines %}
+            <div class="rounded-[1.25rem] bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
+              <div class="text-sm font-semibold leading-6 text-slate-900">{{ item.name }}</div>
+              <div class="text-sm leading-6 text-slate-600">
+                {{ item.date.strftime("%d.%m.%Y") if item.date else "Дата не указана" }}
+                {% if item.status == "planned" %}
+                  • Планируется
+                {% else %}
+                  • Сделана
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="mt-4 rounded-[1.25rem] bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-900 ring-1 ring-emerald-100">
+          Последняя прививка:
+          {{ child_recent_vaccines[0].date.strftime("%d.%m.%Y") if child_recent_vaccines[0].date else "дата не указана" }}
+          {% if child_next_vaccine %}
+            <br />
+            Следующая: {{ child_next_vaccine.name }} — {{ child_next_vaccine.date.strftime("%d.%m.%Y") if child_next_vaccine.date else "дата не указана" }}
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="mt-4 rounded-[1.25rem] bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-500 ring-1 ring-slate-200">
+          Нет данных о прививках.
+        </div>
+      {% endif %}
+    </article>
+
+    <article class="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-xs uppercase tracking-[0.26em] text-slate-500">Лекарства</p>
+          <h3 class="mt-2 text-xl font-semibold text-slate-900">Текущий приём</h3>
+        </div>
+        <a href="/extra?selected_patient_id={{ selected_patient.id }}&child_tab=medications" class="shrink-0 rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white">
+          Управление лекарствами
+        </a>
+      </div>
+
+      {% if child_active_medications %}
+        <div class="mt-4 space-y-2">
+          {% for item in child_active_medications %}
+            <div class="rounded-[1.25rem] bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
+              <div class="text-sm font-semibold leading-6 text-slate-900">{{ item.name }}</div>
+              <div class="text-sm leading-6 text-slate-600">
+                {{ item.dosage or "Дозировка не указана" }}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        {% if child_next_medication_reminder %}
+          <div class="mt-4 rounded-[1.25rem] bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900 ring-1 ring-amber-100">
+            Следующий приём в {{ child_next_medication_reminder.time_of_day.strftime("%H:%M") }}.
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="mt-4 rounded-[1.25rem] bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-500 ring-1 ring-slate-200">
+          Нет активных лекарств.
+        </div>
+      {% endif %}
+    </article>
+  </section>
+</article>

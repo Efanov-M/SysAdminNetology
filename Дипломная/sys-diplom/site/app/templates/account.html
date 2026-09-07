@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+{% from "partials/page_header.html" import page_header %}
+{% block body %}
+  <main class="min-h-screen bg-slate-100">
+    <div class="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8" x-data="{ accountTab: 'profile', matrixModalOpen: {{ 'true' if matrix_link_token and not (matrix_profile and matrix_profile.is_linked) else 'false' }} }">
+      {% call page_header("Аккаунт", "Настройки аккаунта", "", True, "/", "/") %}
+        <a class="rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/25" href="/audit">Журнал</a>
+        <a class="rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white hover:bg-white/25" href="/medications/search">Препараты</a>
+      {% endcall %}
+
+      {% if message %}
+        <div class="mb-4 rounded-2xl border px-4 py-3 text-sm {% if is_error %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-700{% endif %}">
+          {{ message }}
+        </div>
+      {% endif %}
+
+      <section class="mb-5 rounded-[1.75rem] bg-white p-3 shadow-sm ring-1 ring-slate-200">
+        <div class="grid grid-cols-3 gap-2">
+          <button type="button" class="rounded-2xl px-4 py-3 text-sm font-semibold transition" :class="accountTab === 'profile' ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-700'" @click="accountTab = 'profile'">Профиль</button>
+          <button type="button" class="rounded-2xl px-4 py-3 text-sm font-semibold transition" :class="accountTab === 'notifications' ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-700'" @click="accountTab = 'notifications'">Уведомления</button>
+          <button type="button" class="rounded-2xl px-4 py-3 text-sm font-semibold transition" :class="accountTab === 'security' ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-700'" @click="accountTab = 'security'">Безопасность</button>
+        </div>
+      </section>
+
+      <section x-show="accountTab === 'profile'" x-transition.opacity.duration.150ms class="space-y-5">
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <div class="text-sm text-slate-500">Текущий аккаунт</div>
+          <h2 class="mt-2 text-2xl font-semibold text-slate-900">{{ user.account_name }}</h2>
+          <div class="mt-4 grid gap-3">
+            <div class="rounded-[1.25rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+              <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Часовой пояс</div>
+              <div class="mt-2 text-sm font-medium text-slate-900">{{ user.timezone }}</div>
+            </div>
+            <div class="rounded-[1.25rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+              <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Secure cookie</div>
+              <div class="mt-2 text-sm text-slate-900">{% if session_cookie_secure %}Включено{% else %}Выключено{% endif %}</div>
+            </div>
+            <div class="rounded-[1.25rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+              <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Matrix</div>
+              <div class="mt-2 text-sm text-slate-900">{% if matrix_profile and matrix_profile.is_linked %}Подключен{% else %}Не подключен{% endif %}</div>
+              {% if matrix_profile and matrix_profile.is_linked %}
+                <div class="mt-1 text-sm text-slate-500">{{ matrix_profile.matrix_user_id }}</div>
+              {% elif matrix_link_token %}
+                <div class="mt-1 text-sm text-amber-600">Подключение не завершено</div>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section x-show="accountTab === 'notifications'" x-transition.opacity.duration.150ms class="space-y-5">
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <div class="mb-4">
+            <h2 class="text-xl font-semibold text-slate-900">Уведомления</h2>
+          </div>
+          <form method="post" action="/account/preferences" class="grid gap-4">
+            <label class="block">
+              <span class="mb-2 block text-sm font-medium text-slate-600">Часовой пояс</span>
+              <input id="timezone_value" name="timezone_value" value="{{ user.timezone }}" placeholder="Europe/Moscow" required class="w-full rounded-2xl border-slate-300 bg-slate-50" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-sm font-medium text-slate-600">Не беспокоить: с</span>
+              <input id="quiet_hours_start" name="quiet_hours_start" type="time" value="{{ user.quiet_hours_start.strftime('%H:%M') if user.quiet_hours_start else '' }}" class="w-full rounded-2xl border-slate-300 bg-slate-50" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-sm font-medium text-slate-600">Не беспокоить: до</span>
+              <input id="quiet_hours_end" name="quiet_hours_end" type="time" value="{{ user.quiet_hours_end.strftime('%H:%M') if user.quiet_hours_end else '' }}" class="w-full rounded-2xl border-slate-300 bg-slate-50" />
+            </label>
+            <div>
+              <div class="mb-2 text-sm font-medium text-slate-600">Каналы уведомлений</div>
+              <div class="grid gap-2">
+                {% for channel in available_notification_channels %}
+                  <label class="inline-flex items-center gap-2 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-700 ring-1 ring-slate-200">
+                    <input type="checkbox" name="notification_channels" value="{{ channel }}" {% if channel in user.notification_channels %}checked{% endif %} class="rounded border-slate-300" />
+                    {{ channel }}
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+            <button type="submit" class="rounded-2xl bg-teal-700 px-5 py-4 text-sm font-semibold text-white hover:bg-teal-600">Сохранить настройки</button>
+          </form>
+        </article>
+
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <div class="mb-4">
+            <h2 class="text-xl font-semibold text-slate-900">Matrix</h2>
+          </div>
+          {% if matrix_profile and matrix_profile.is_linked %}
+            <div class="rounded-2xl bg-emerald-50 px-4 py-4 text-sm text-emerald-900 ring-1 ring-emerald-100">
+              <div class="font-semibold">Статус: Подключен ✅</div>
+              <div class="mt-2">Matrix ID: <span class="font-semibold">{{ matrix_profile.matrix_user_id }}</span></div>
+            </div>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+              <form method="post" action="/matrix/test">
+                <button type="submit" class="w-full rounded-2xl border border-slate-300 px-5 py-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">Отправить тест</button>
+              </form>
+              <form method="post" action="/matrix/unlink">
+                <button type="submit" class="w-full rounded-2xl bg-rose-600 px-5 py-4 text-sm font-semibold text-white hover:bg-rose-500">Отключить</button>
+              </form>
+            </div>
+          {% else %}
+            <div class="rounded-2xl bg-rose-50 px-4 py-4 text-sm text-rose-900 ring-1 ring-rose-100">
+              <div class="font-semibold">Статус: Не подключен ❌</div>
+              <div class="mt-2">Без подключения сигналы и уведомления не отправляются.</div>
+              {% if matrix_link_token %}
+                <div class="mt-2 font-medium">Подключение не завершено</div>
+              {% endif %}
+            </div>
+            {% if matrix_link_token %}
+              <div class="mt-4 rounded-2xl bg-cyan-50 px-4 py-4 text-sm text-cyan-900 ring-1 ring-cyan-100">
+                <div class="font-semibold">Код готов</div>
+                <div class="mt-2">Откройте инструкцию, скопируйте код и введите свой Matrix ID.</div>
+                <button type="button" @click="matrixModalOpen = true" class="mt-4 w-full rounded-2xl border border-cyan-300 bg-white px-5 py-4 text-sm font-semibold text-cyan-900">Открыть инструкцию</button>
+              </div>
+            {% endif %}
+            <form method="post" action="/matrix/link/start" class="mt-4">
+              <button type="submit" class="w-full rounded-2xl bg-teal-700 px-5 py-4 text-sm font-semibold text-white hover:bg-teal-600">Подключить Matrix</button>
+            </form>
+          {% endif %}
+        </article>
+
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <div class="mb-4">
+            <h2 class="text-xl font-semibold text-slate-900">Экстренный сигнал</h2>
+            <p class="mt-1 text-sm text-slate-700">Кнопка “Мне плохо” отправляет короткий сигнал родственнику. Здесь нет порогов и сложных настроек.</p>
+          </div>
+          <div class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200 text-sm text-slate-700">
+            {% if matrix_profile and matrix_profile.is_linked %}
+              Matrix подключен. Экстренный сигнал можно отправлять сразу.
+            {% else %}
+              Сначала подключите Matrix. После этого кнопка “Мне плохо” будет работать без дополнительных шагов.
+            {% endif %}
+          </div>
+        </article>
+
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <div class="mb-4">
+            <h2 class="text-xl font-semibold text-slate-900">Контроль показателей</h2>
+            <p class="mt-1 text-sm text-slate-700">Если давление или сахар выходят за пределы, система отправляет уведомление.</p>
+          </div>
+          <div class="space-y-4">
+            {% for patient in patients %}
+              {% set patient_rules = alert_rules_map.get(patient.id, {}) %}
+              {% set blood_pressure_rule = patient_rules.get("blood_pressure") %}
+              {% set glucose_rule = patient_rules.get("glucose") %}
+              <form method="post" action="/account/alert-settings" class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+                <input type="hidden" name="patient_id" value="{{ patient.id }}" />
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <div class="text-base font-semibold text-slate-900">{{ patient.name }}</div>
+                    <div class="mt-1 text-sm text-slate-500">{{ "Ребёнок" if patient.patient_type == "child" else "Пожилой" }}</div>
+                  </div>
+                  <label class="inline-flex items-center gap-2 rounded-2xl bg-white px-3 py-2 text-sm text-slate-700 ring-1 ring-slate-200">
+                    <input type="checkbox" name="enabled" {% if (blood_pressure_rule and blood_pressure_rule.enabled) or (glucose_rule and glucose_rule.enabled) %}checked{% endif %} class="rounded border-slate-300" />
+                    Включить
+                  </label>
+                </div>
+                <div class="mt-4 grid gap-3">
+                  <div class="grid gap-3 sm:grid-cols-2">
+                    <label class="block">
+                      <span class="mb-2 block text-sm font-medium text-slate-700">Давление: верхний порог</span>
+                      <input name="blood_pressure_sys_threshold" type="number" min="80" max="300" value="{{ blood_pressure_rule.systolic_max if blood_pressure_rule and blood_pressure_rule.systolic_max else '' }}" placeholder="160" class="w-full rounded-2xl border-slate-300 bg-white" />
+                    </label>
+                    <label class="block">
+                      <span class="mb-2 block text-sm font-medium text-slate-700">Давление: нижний порог</span>
+                      <input name="blood_pressure_dia_threshold" type="number" min="50" max="200" value="{{ blood_pressure_rule.diastolic_max if blood_pressure_rule and blood_pressure_rule.diastolic_max else '' }}" placeholder="100" class="w-full rounded-2xl border-slate-300 bg-white" />
+                    </label>
+                    <label class="block">
+                      <span class="mb-2 block text-sm font-medium text-slate-700">Сахар: верхний порог</span>
+                      <input name="blood_sugar_threshold" type="number" step="0.1" min="1" max="40" value="{{ glucose_rule.glucose_max if glucose_rule and glucose_rule.glucose_max else '' }}" placeholder="10.0" class="w-full rounded-2xl border-slate-300 bg-white" />
+                    </label>
+                  </div>
+                  <div class="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+                    <div class="text-sm font-semibold text-slate-900">Тихие часы и escalation для давления</div>
+                    <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                      <label class="block">
+                        <span class="mb-2 block text-sm font-medium text-slate-700">Не тревожить с</span>
+                        <input name="bp_quiet_hours_start" type="time" value="{{ blood_pressure_rule.quiet_hours_start.strftime('%H:%M') if blood_pressure_rule and blood_pressure_rule.quiet_hours_start else '' }}" class="w-full rounded-2xl border-slate-300 bg-white" />
+                      </label>
+                      <label class="block">
+                        <span class="mb-2 block text-sm font-medium text-slate-700">Не тревожить до</span>
+                        <input name="bp_quiet_hours_end" type="time" value="{{ blood_pressure_rule.quiet_hours_end.strftime('%H:%M') if blood_pressure_rule and blood_pressure_rule.quiet_hours_end else '' }}" class="w-full rounded-2xl border-slate-300 bg-white" />
+                      </label>
+                    </div>
+                    <label class="mt-3 block">
+                      <span class="mb-2 block text-sm font-medium text-slate-700">Кому эскалировать давление</span>
+                      <textarea name="bp_escalation_targets" rows="3" placeholder="@relative:matrix.org&#10;!room:matrix.org" class="w-full rounded-2xl border-slate-300 bg-white">{{ '\n'.join(blood_pressure_rule.escalation_targets or []) if blood_pressure_rule else '' }}</textarea>
+                    </label>
+                  </div>
+                  <div class="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+                    <div class="text-sm font-semibold text-slate-900">Тихие часы и escalation для сахара</div>
+                    <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                      <label class="block">
+                        <span class="mb-2 block text-sm font-medium text-slate-700">Не тревожить с</span>
+                        <input name="glucose_quiet_hours_start" type="time" value="{{ glucose_rule.quiet_hours_start.strftime('%H:%M') if glucose_rule and glucose_rule.quiet_hours_start else '' }}" class="w-full rounded-2xl border-slate-300 bg-white" />
+                      </label>
+                      <label class="block">
+                        <span class="mb-2 block text-sm font-medium text-slate-700">Не тревожить до</span>
+                        <input name="glucose_quiet_hours_end" type="time" value="{{ glucose_rule.quiet_hours_end.strftime('%H:%M') if glucose_rule and glucose_rule.quiet_hours_end else '' }}" class="w-full rounded-2xl border-slate-300 bg-white" />
+                      </label>
+                    </div>
+                    <label class="mt-3 block">
+                      <span class="mb-2 block text-sm font-medium text-slate-700">Кому эскалировать сахар</span>
+                      <textarea name="glucose_escalation_targets" rows="3" placeholder="@relative:matrix.org&#10;!room:matrix.org" class="w-full rounded-2xl border-slate-300 bg-white">{{ '\n'.join(glucose_rule.escalation_targets or []) if glucose_rule else '' }}</textarea>
+                    </label>
+                  </div>
+                </div>
+                <p class="mt-3 text-sm leading-6 text-slate-700">Если показатель выйдет за пределы, система сначала проверит тихие часы для этого типа тревоги, а затем отправит сигнал в отдельную escalation-цепочку или всем подключённым родственникам.</p>
+                <button type="submit" class="mt-4 w-full rounded-2xl bg-teal-700 px-5 py-4 text-sm font-semibold text-white hover:bg-teal-600">Сохранить контроль</button>
+              </form>
+            {% else %}
+              <div class="rounded-[1.25rem] border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Пациентов пока нет.</div>
+            {% endfor %}
+          </div>
+        </article>
+
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <h2 class="text-xl font-semibold text-slate-900">Проверить уведомления</h2>
+          <form method="post" action="/account/notifications/test" class="mt-4">
+            <button type="submit" class="w-full rounded-2xl bg-teal-700 px-5 py-4 text-sm font-semibold text-white hover:bg-teal-600">Проверить связь</button>
+          </form>
+        </article>
+
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <h2 class="text-xl font-semibold text-slate-900">Неудачные уведомления</h2>
+          <div class="mt-4 space-y-3">
+            {% for item in failed_notification_entries %}
+              <div class="rounded-[1.25rem] bg-rose-50 p-4 ring-1 ring-rose-200">
+                <div class="font-medium text-slate-900">{{ item.action_label }}</div>
+                <div class="mt-1 text-sm text-slate-500">{{ item.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+              </div>
+            {% else %}
+              <div class="rounded-[1.25rem] border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Неудачных уведомлений пока нет.</div>
+            {% endfor %}
+          </div>
+        </article>
+
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <h2 class="text-xl font-semibold text-slate-900">Очередь повторной доставки</h2>
+          <div class="mt-3 rounded-[1.25rem] bg-slate-50 p-4 text-sm text-slate-600 ring-1 ring-slate-200">
+            В очереди {{ queue_stats.queued }} • Застрявшие {{ queue_stats.stale }} • Макс. попыток {{ queue_stats.max_attempts }}
+          </div>
+          <form method="post" action="/account/notifications/process-queue" class="mt-4">
+            <button type="submit" class="w-full rounded-2xl border border-slate-300 px-5 py-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">Обработать очередь повторов</button>
+          </form>
+        </article>
+
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <h2 class="text-xl font-semibold text-slate-900">Локальный каталог лекарств</h2>
+          <p class="mt-1 text-sm text-slate-500">Кэш ускоряет поиск и помогает работать офлайн.</p>
+          <div class="mt-3 rounded-[1.25rem] bg-slate-50 p-4 text-sm text-slate-600 ring-1 ring-slate-200">
+            Записей {{ drug_cache_summary.count }}{% if drug_cache_summary.latest %} • обновлялся {{ drug_cache_summary.latest.strftime("%d.%m.%Y %H:%M") }}{% endif %}
+          </div>
+          <div class="mt-3 grid gap-3 sm:grid-cols-2">
+            <div class="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+              <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Качество кэша</div>
+              <div class="mt-2 text-sm text-slate-900">Без инструкции: {{ drug_cache_report.missing_instructions }}</div>
+              <div class="mt-1 text-sm text-slate-600">Локальных записей: {{ drug_cache_report.local_sources }}</div>
+              <div class="mt-1 text-sm text-slate-600">Внешних записей: {{ drug_cache_report.remote_sources }}</div>
+              <div class="mt-1 text-sm text-slate-600">Групп дублей: {{ drug_cache_report.duplicate_groups }}</div>
+              <div class="mt-1 text-sm text-slate-600">Устаревших записей: {{ drug_cache_report.stale_entries }}</div>
+            </div>
+            <div class="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+              <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Что можно сделать</div>
+              <div class="mt-2 text-sm leading-6 text-slate-600">Проверка кэша выравнивает названия, объединяет похожие дубли и помогает мягко обновлять семейный офлайн-каталог без потери локальных инструкций.</div>
+            </div>
+          </div>
+          <div class="mt-4 grid gap-3 sm:grid-cols-2">
+            <form method="post" action="/account/drug-cache/moderate">
+              <button type="submit" class="w-full rounded-2xl bg-teal-700 px-5 py-4 text-sm font-semibold text-white hover:bg-teal-600">Проверить и почистить кэш</button>
+            </form>
+            <form method="post" action="/account/drug-cache/clear">
+              <button type="submit" class="w-full rounded-2xl border border-slate-300 px-5 py-4 text-sm font-semibold text-slate-700 hover:bg-slate-50">Очистить кэш лекарств</button>
+            </form>
+          </div>
+          <div class="mt-3 text-sm text-slate-500">Это не удаляет локальный семейный каталог по умолчанию, а только обслуживает накопленный кэш поиска.</div>
+        </article>
+
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <h2 class="text-xl font-semibold text-slate-900">Printable-листы по лекарствам</h2>
+          <p class="mt-1 text-sm text-slate-500">Короткие печатные версии помогают семье передавать смену и быстро понимать, что принимать сегодня и на неделе.</p>
+          <div class="mt-4 grid gap-3">
+            {% for patient in patients %}
+              <div class="rounded-[1.25rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+                <div class="text-base font-semibold text-slate-900">{{ patient.name }}</div>
+                <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                  <a class="rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-white" href="/patients/{{ patient.id }}/print/medications?layout=today">Что принимать сегодня</a>
+                  <a class="rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-white" href="/patients/{{ patient.id }}/print/medications?layout=weekly">Недельный лист лекарств</a>
+                </div>
+              </div>
+            {% else %}
+              <div class="rounded-[1.25rem] border border-dashed border-slate-300 px-4 py-6 text-sm text-slate-500">Пациентов пока нет.</div>
+            {% endfor %}
+          </div>
+        </article>
+      </section>
+
+      <section x-show="accountTab === 'security'" x-transition.opacity.duration.150ms class="space-y-5">
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <div class="mb-4">
+            <h2 class="text-xl font-semibold text-slate-900">Сменить пароль</h2>
+            <p class="mt-1 text-sm text-slate-500">Здесь только действия по безопасности без технической перегрузки.</p>
+          </div>
+          <form method="post" action="/account/password" class="grid gap-4">
+            <label class="block">
+              <span class="mb-2 block text-sm font-medium text-slate-600">Текущий пароль</span>
+              <input id="current_password" name="current_password" type="password" required class="w-full rounded-2xl border-slate-300 bg-slate-50" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-sm font-medium text-slate-600">Новый пароль</span>
+              <input id="new_password" name="new_password" type="password" minlength="6" required class="w-full rounded-2xl border-slate-300 bg-slate-50" />
+            </label>
+            <label class="block">
+              <span class="mb-2 block text-sm font-medium text-slate-600">Повторите новый пароль</span>
+              <input id="confirm_password" name="confirm_password" type="password" minlength="6" required class="w-full rounded-2xl border-slate-300 bg-slate-50" />
+            </label>
+            <button type="submit" class="rounded-2xl bg-teal-700 px-5 py-4 text-sm font-semibold text-white hover:bg-teal-600">Обновить пароль</button>
+          </form>
+        </article>
+
+        <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <h2 class="text-xl font-semibold text-slate-900">История и диагностика</h2>
+          <div class="mt-4 grid gap-3">
+            <a class="rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50" href="/account/worker-monitor">Монитор очереди</a>
+            <a class="rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50" href="/notifications/print?layout=compact">Печать истории уведомлений</a>
+            <a class="rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50" href="/inbox">Родственнический inbox</a>
+          </div>
+        </article>
+      </section>
+
+      <div x-cloak x-show="matrixModalOpen" x-transition.opacity.duration.150ms class="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-4 sm:items-center">
+        <div @click.away="matrixModalOpen = false" class="w-full max-w-lg rounded-[2rem] bg-white p-5 shadow-2xl ring-1 ring-slate-200">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="text-xs uppercase tracking-[0.28em] text-slate-500">Matrix</p>
+              <h2 class="mt-2 text-2xl font-semibold text-slate-900">Подключение уведомлений</h2>
+            </div>
+            <button type="button" @click="matrixModalOpen = false" class="rounded-full bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700">Закрыть</button>
+          </div>
+
+          <div class="mt-5 space-y-4">
+            <section class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+              <div class="text-sm font-semibold text-slate-900">Шаг 1</div>
+              <div class="mt-2 text-base leading-7 text-slate-700">Откройте приложение Element.</div>
+              <a href="https://app.element.io/" target="_blank" rel="noreferrer" class="mt-3 inline-flex items-center justify-center rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-600">Открыть Element</a>
+            </section>
+
+            <section class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+              <div class="text-sm font-semibold text-slate-900">Шаг 2</div>
+              <div class="mt-2 text-base leading-7 text-slate-700">Найдите свой Matrix ID в Element и сохраните его. Он выглядит примерно так: <span class="font-semibold">@user:matrix.org</span>.</div>
+            </section>
+
+            <section class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+              <div class="text-sm font-semibold text-slate-900">Шаг 3</div>
+              <div class="mt-2 text-base leading-7 text-slate-700">Скопируйте код подключения:</div>
+              <div class="mt-3 rounded-2xl bg-white px-4 py-4 text-center text-3xl font-bold tracking-[0.25em] text-slate-900 ring-1 ring-slate-200">{{ matrix_link_token.token if matrix_link_token else "—" }}</div>
+              <button type="button" data-copy-text="{{ matrix_link_token.token if matrix_link_token else '' }}" class="mt-3 inline-flex w-full items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 js-copy-trigger">Скопировать код</button>
+            </section>
+
+            <section class="rounded-[1.5rem] bg-cyan-50 p-4 ring-1 ring-cyan-100">
+              <div class="text-sm font-semibold text-cyan-900">Шаг 4</div>
+              <div class="mt-2 text-base leading-7 text-cyan-900">Введите свой Matrix ID и завершите подключение.</div>
+              <div class="mt-2 text-sm leading-6 text-cyan-900">Если нужно, сначала найдите бота:</div>
+              <div class="mt-3 rounded-2xl bg-white px-4 py-4 text-lg font-semibold text-slate-900 ring-1 ring-slate-200 break-all">{{ matrix_bot_id or "@phr-bot" }}</div>
+              <div class="mt-3 grid gap-2 sm:grid-cols-2">
+                <a href="https://matrix.to/#/{{ matrix_bot_id or '@phr-bot' }}" target="_blank" rel="noreferrer" class="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700">Открыть бота</a>
+                <button type="button" data-copy-text="{{ matrix_bot_id or '@phr-bot' }}" class="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 js-copy-trigger">Скопировать</button>
+              </div>
+              <form method="post" action="/matrix/link/manual" class="mt-4 space-y-3">
+                <input type="hidden" name="code" value="{{ matrix_link_token.token if matrix_link_token else '' }}" />
+                <label class="block">
+                  <span class="mb-2 block text-sm font-medium text-cyan-900">Ваш Matrix ID</span>
+                  <input name="matrix_user_id" placeholder="@user:matrix.org" required class="w-full rounded-2xl border-cyan-200 bg-white" />
+                </label>
+                <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-600">Завершить подключение</button>
+              </form>
+              <p class="mt-3 text-sm leading-6 text-cyan-900">После этого статус наверху изменится на “Подключен”.</p>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock %}

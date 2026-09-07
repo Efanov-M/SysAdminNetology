@@ -1,0 +1,88 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-phr}
+      POSTGRES_USER: ${POSTGRES_USER:-phr}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-phr}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-phr} -d ${POSTGRES_DB:-phr}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    expose:
+      - "8000"
+    volumes:
+      - uploads_data:/app/uploads
+      - backups_data:/app/backups
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  notification-worker:
+    build: .
+    restart: unless-stopped
+    command: ["python", "-m", "app.workers.notification_queue_worker"]
+    env_file:
+      - .env.production
+    volumes:
+      - uploads_data:/app/uploads
+      - backups_data:/app/backups
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  matrix-bot:
+    build: ./matrix-bot
+    restart: always
+    env_file:
+      - .env.production
+    environment:
+      MATRIX_HOMESERVER: "https://matrix.efanov.online"
+      MATRIX_BOT_USER_ID: "@phr-bot:matrix.efanov.online"
+      BACKEND_URL: "http://web:8000"
+    depends_on:
+      - web
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
+  backups_data:
+  caddy_data:
+  caddy_config:

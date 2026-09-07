@@ -1,0 +1,100 @@
+<div
+  id="dashboard-shell"
+  class="grid gap-4 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[320px_minmax(0,1fr)] 2xl:grid-cols-[336px_minmax(0,1fr)]"
+  x-data="{ extraTab: '{% if current_screen == 'emergency' %}emergency{% else %}documents{% endif %}' }"
+>
+  <aside class="space-y-4">
+    {% include "partials/patient_block.html" %}
+  </aside>
+
+  <section class="space-y-5">
+    {% if selected_patient %}
+      <section class="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-200">
+        <div class="border-b border-slate-200 p-4 sm:p-5">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <nav class="grid grid-cols-2 gap-2 rounded-[1.5rem] bg-slate-100 p-1.5 sm:grid-cols-5">
+              <a href="/?selected_patient_id={{ selected_patient.id }}" class="rounded-[1.1rem] px-4 py-3 text-center text-sm font-semibold transition {% if current_screen == 'main' %}bg-teal-700 text-white shadow-sm{% else %}text-slate-700 hover:text-slate-950{% endif %}">Главная</a>
+              <a href="/history?selected_patient_id={{ selected_patient.id }}" class="rounded-[1.1rem] px-4 py-3 text-center text-sm font-semibold transition {% if current_screen == 'history' %}bg-teal-700 text-white shadow-sm{% else %}text-slate-700 hover:text-slate-950{% endif %}">История</a>
+              <a href="/graph?selected_patient_id={{ selected_patient.id }}" class="rounded-[1.1rem] px-4 py-3 text-center text-sm font-semibold transition {% if current_screen == 'graph' %}bg-teal-700 text-white shadow-sm{% else %}text-slate-700 hover:text-slate-950{% endif %}">Графики</a>
+              <a href="/planner?selected_patient_id={{ selected_patient.id }}" class="rounded-[1.1rem] px-4 py-3 text-center text-sm font-semibold transition {% if current_screen == 'planner' %}bg-teal-700 text-white shadow-sm{% else %}text-slate-700 hover:text-slate-950{% endif %}">План</a>
+              <a href="/extra?selected_patient_id={{ selected_patient.id }}" class="rounded-[1.1rem] px-4 py-3 text-center text-sm font-semibold transition {% if current_screen in ['extra', 'emergency'] %}bg-teal-700 text-white shadow-sm{% else %}text-slate-700 hover:text-slate-950{% endif %}">Ещё</a>
+            </nav>
+          </div>
+        </div>
+
+        <div class="p-5">
+          {% if selected_patient.patient_type == "child" %}
+            {% if current_screen == "graph" %}
+              {% include "partials/child_chart.html" %}
+            {% elif current_screen == "history" %}
+              {% include "partials/child_history.html" %}
+            {% elif current_screen == "planner" %}
+              {% include "partials/child_planner.html" %}
+            {% elif current_screen == "emergency" %}
+              {% include "partials/emergency_info.html" %}
+            {% elif current_screen == "extra" %}
+              {% include "partials/child_extra.html" %}
+            {% else %}
+              {% include "partials/child_main.html" %}
+            {% endif %}
+          {% elif current_screen == "history" %}
+            {% include "partials/history.html" %}
+          {% elif current_screen == "planner" %}
+            {% include "partials/care_control.html" %}
+          {% elif current_screen == "graph" %}
+            {% include "partials/chart.html" %}
+          {% elif current_screen in ["extra", "emergency"] %}
+            <div class="space-y-4">
+              <section class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+                <h2 class="text-xl font-semibold text-slate-950">Ещё</h2>
+                <div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <button type="button" class="rounded-2xl px-4 py-3 text-sm font-semibold transition" :class="extraTab === 'documents' ? 'bg-teal-700 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200'" @click="extraTab = 'documents'">Документы</button>
+                  <button type="button" class="rounded-2xl px-4 py-3 text-sm font-semibold transition" :class="extraTab === 'emergency' ? 'bg-teal-700 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200'" @click="extraTab = 'emergency'">Экстренное</button>
+                  <button type="button" class="rounded-2xl px-4 py-3 text-sm font-semibold transition" :class="extraTab === 'medications' ? 'bg-teal-700 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200'" @click="extraTab = 'medications'">Лекарства</button>
+                  <button type="button" class="rounded-2xl px-4 py-3 text-sm font-semibold transition" :class="extraTab === 'more' ? 'bg-teal-700 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-200'" @click="extraTab = 'more'">Прочее</button>
+                </div>
+              </section>
+
+              <div x-show="extraTab === 'documents'" x-transition.opacity.duration.150ms>
+                {% include "partials/documents.html" %}
+              </div>
+              <div x-show="extraTab === 'emergency'" x-transition.opacity.duration.150ms>
+                {% include "partials/emergency_info.html" %}
+              </div>
+              <div x-show="extraTab === 'medications'" x-transition.opacity.duration.150ms>
+                {% include "partials/medications.html" %}
+              </div>
+              <div x-show="extraTab === 'more'" x-transition.opacity.duration.150ms>
+                <article class="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+                  <h3 class="text-xl font-semibold text-slate-950">Ещё разделы</h3>
+                  <div class="mt-4 space-y-4">
+                    {% include "partials/comments.html" %}
+                    <section class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+                      <h4 class="text-lg font-semibold text-slate-950">Доступ</h4>
+                      {% if user.role == "owner" %}
+                        <a href="/family/users" class="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white">Открыть членов семьи</a>
+                      {% else %}
+                        <div class="mt-4 rounded-[1.25rem] bg-white px-4 py-4 text-sm text-slate-700 ring-1 ring-slate-200">
+                          Доступом управляет владелец семьи.
+                        </div>
+                      {% endif %}
+                    </section>
+                  </div>
+                </article>
+              </div>
+            </div>
+          {% else %}
+            {% include "partials/pressure_form.html" %}
+          {% endif %}
+        </div>
+      </section>
+    {% else %}
+      <article class="rounded-[1.75rem] bg-white p-8 shadow-sm ring-1 ring-slate-200">
+        <h2 class="text-2xl font-semibold text-slate-900">Начало работы</h2>
+        <p class="mt-2 max-w-xl text-sm text-slate-500">
+          Добавьте первого члена семьи слева, и здесь появится простой экран выбора пациента и ввода давления.
+        </p>
+      </article>
+    {% endif %}
+  </section>
+</div>

@@ -1,0 +1,142 @@
+{% set chart_items = observations | selectattr("type", "equalto", chart_type) | list %}
+{% set chart_latest = chart_items[0] if chart_items else None %}
+{% set chart_has_data = chart_items | length > 0 %}
+<article id="chart-block" class="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-200">
+  <div class="flex flex-col gap-4 border-b border-slate-200 p-5 lg:flex-row lg:items-start lg:justify-between">
+    <div>
+      <h2 class="text-2xl font-semibold text-slate-950">Графики</h2>
+      <p class="mt-1 text-sm text-slate-700">Один график показывает один показатель.</p>
+    </div>
+    {% if selected_patient and chart_has_data %}
+      <form
+        method="get"
+        action="/partials/chart"
+        hx-get="/partials/chart"
+        hx-target="#chart-block"
+        hx-swap="outerHTML"
+        class="grid gap-3 sm:grid-cols-2 lg:min-w-[24rem]"
+      >
+        <input type="hidden" name="selected_patient_id" value="{{ selected_patient.id }}" />
+        <input type="hidden" name="history_type" value="{{ history_type }}" />
+        <input type="hidden" name="history_date_from" value="{{ history_date_from }}" />
+        <input type="hidden" name="history_date_to" value="{{ history_date_to }}" />
+        <input type="hidden" name="history_sort" value="{{ history_sort }}" />
+        <input type="hidden" name="date_preset" value="{{ date_preset }}" />
+
+        <label class="block">
+          <span class="mb-1 block text-sm font-medium text-slate-600">Тип графика</span>
+          <select name="chart_type" class="w-full rounded-2xl border-slate-300" onchange="this.form.requestSubmit()">
+            <option value="blood_pressure" {% if chart_type == "blood_pressure" %}selected{% endif %}>Давление</option>
+            <option value="blood_sugar" {% if chart_type == "blood_sugar" %}selected{% endif %}>Сахар</option>
+            <option value="temperature" {% if chart_type == "temperature" %}selected{% endif %}>Температура</option>
+            <option value="weight" {% if chart_type == "weight" %}selected{% endif %}>Вес</option>
+            <option value="lab_result" {% if chart_type == "lab_result" %}selected{% endif %}>Анализы</option>
+          </select>
+        </label>
+
+        {% if chart_type == "lab_result" %}
+          <label class="block">
+            <span class="mb-1 block text-sm font-medium text-slate-600">Показатель</span>
+            <select name="chart_lab_test" class="w-full rounded-2xl border-slate-300" onchange="this.form.requestSubmit()">
+              <option value="">Все анализы</option>
+              {% for test_name in lab_test_names %}
+                <option value="{{ test_name }}" {% if chart_lab_test == test_name %}selected{% endif %}>{{ test_name }}</option>
+              {% endfor %}
+            </select>
+          </label>
+        {% else %}
+          <input type="hidden" name="chart_lab_test" value="{{ chart_lab_test }}" />
+        {% endif %}
+      </form>
+    {% endif %}
+  </div>
+
+  {% if selected_patient %}
+    {% if chart_has_data %}
+    <div class="grid gap-3 border-b border-slate-200 p-5 sm:grid-cols-2">
+      <div class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+        <div class="text-xs uppercase tracking-[0.24em] text-slate-600">Последняя запись</div>
+        <div class="mt-2 text-2xl font-semibold text-slate-900">
+          {% if chart_latest and chart_type == "blood_pressure" %}
+            {{ chart_latest.value.sys }}/{{ chart_latest.value.dia }}
+          {% elif chart_latest and chart_type == "lab_result" %}
+            {{ chart_latest.value.value }}
+          {% elif chart_latest %}
+            {{ chart_latest.value.value }}
+          {% else %}
+            --
+          {% endif %}
+        </div>
+        <div class="mt-2 text-sm text-slate-500">
+          {% if chart_type == "blood_pressure" %}мм рт. ст.{% elif chart_latest %}{{ chart_latest.value.unit or "без единиц" }}{% else %}нет данных{% endif %}
+        </div>
+      </div>
+      <div class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+        <div class="text-xs uppercase tracking-[0.24em] text-slate-600">Показатель</div>
+        <div class="mt-2 text-lg font-semibold text-slate-900">
+          {% if chart_type == "blood_pressure" %}Давление{% elif chart_type == "blood_sugar" %}Сахар{% elif chart_type == "temperature" %}Температура{% elif chart_type == "weight" %}Вес{% else %}Анализы{% endif %}
+        </div>
+        <div class="mt-2 text-sm text-slate-500">{% if chart_type == "blood_pressure" %}Можно включать SYS, DIA и PULSE отдельно.{% else %}Чистая линия без лишних блоков и переключателей.{% endif %}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if chart_has_data %}
+    <div class="flex flex-col gap-4 px-5 pt-4">
+      <div class="flex flex-wrap gap-2">
+        <button hx-get="/partials/chart?selected_patient_id={{ selected_patient.id }}&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}&history_type={{ history_type }}&history_sort={{ history_sort }}&date_preset=today" hx-target="#chart-block" hx-swap="outerHTML" type="button" class="rounded-full px-3 py-2 text-xs font-semibold {% if date_preset == 'today' %}bg-teal-700 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">День</button>
+        <button hx-get="/partials/chart?selected_patient_id={{ selected_patient.id }}&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}&history_type={{ history_type }}&history_sort={{ history_sort }}&date_preset=7d" hx-target="#chart-block" hx-swap="outerHTML" type="button" class="rounded-full px-3 py-2 text-xs font-semibold {% if date_preset == '7d' %}bg-teal-700 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Неделя</button>
+        <button hx-get="/partials/chart?selected_patient_id={{ selected_patient.id }}&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}&history_type={{ history_type }}&history_sort={{ history_sort }}&date_preset=30d" hx-target="#chart-block" hx-swap="outerHTML" type="button" class="rounded-full px-3 py-2 text-xs font-semibold {% if date_preset == '30d' %}bg-teal-700 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Месяц</button>
+        <button hx-get="/partials/chart?selected_patient_id={{ selected_patient.id }}&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}&history_type={{ history_type }}&history_sort={{ history_sort }}" hx-target="#chart-block" hx-swap="outerHTML" type="button" class="rounded-full px-3 py-2 text-xs font-semibold {% if not date_preset %}bg-teal-700 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Все</button>
+      </div>
+
+      {% if chart_type == "blood_pressure" %}
+        <div class="flex flex-wrap items-center gap-2 text-sm">
+          <span class="text-slate-500">Показать:</span>
+          <label class="inline-flex items-center gap-2 rounded-full bg-teal-50 px-3 py-2 leading-tight text-teal-800 ring-1 ring-teal-200"><input type="checkbox" class="h-4 w-4 shrink-0 rounded border-slate-300" data-chart-toggle="sys" checked /> <span>SYS</span></label>
+          <label class="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-2 leading-tight text-amber-800 ring-1 ring-amber-200"><input type="checkbox" class="h-4 w-4 shrink-0 rounded border-slate-300" data-chart-toggle="dia" checked /> <span>DIA</span></label>
+          <label class="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-2 leading-tight text-sky-800 ring-1 ring-sky-200"><input type="checkbox" class="h-4 w-4 shrink-0 rounded border-slate-300" data-chart-toggle="pulse" checked /> <span>PULSE</span></label>
+          <span class="rounded-full bg-emerald-50 px-3 py-2 text-xs font-semibold leading-tight text-emerald-700 ring-1 ring-emerald-200">Зелёная зона: ориентир нормы</span>
+        </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% if chart_has_data %}
+      <div
+        class="m-5 h-[24rem] rounded-[1.75rem] bg-gradient-to-b from-sky-50 via-white to-white p-4 ring-1 ring-slate-200"
+        hx-get="/partials/chart?selected_patient_id={{ selected_patient.id }}&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}&history_type={{ history_type }}&history_date_from={{ history_date_from }}&history_date_to={{ history_date_to }}&history_sort={{ history_sort }}&date_preset={{ date_preset }}"
+        hx-trigger="chartChanged from:body"
+        hx-target="#chart-block"
+        hx-swap="outerHTML"
+      >
+        <canvas
+          id="observationChart"
+          data-observation-chart="true"
+          data-patient-id="{{ selected_patient.id }}"
+          data-chart-type="{{ chart_type }}"
+          data-chart-lab-test="{{ chart_lab_test }}"
+          data-date-from="{{ history_date_from }}"
+          data-date-to="{{ history_date_to }}"
+        ></canvas>
+        <div data-chart-empty-state="true" class="hidden h-full place-items-center text-center text-sm font-medium text-slate-500" style="display:none;">
+          Нет данных для отображения
+        </div>
+      </div>
+    {% else %}
+      <div class="m-5 rounded-[1.75rem] border border-dashed border-slate-300 px-5 py-10 text-center">
+        <div class="text-lg font-semibold text-slate-900">Нет данных</div>
+        <div class="mt-2 text-sm text-slate-500">Добавьте запись на главном экране</div>
+      </div>
+    {% endif %}
+
+    {% if chart_has_data %}
+    <div class="flex flex-wrap gap-2 px-5 pb-5 text-sm">
+      <a class="rounded-full border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50" href="/patients/{{ selected_patient.id }}/charts/print?chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}">Версия для печати</a>
+      <a class="rounded-full border border-slate-300 px-4 py-2 text-slate-700 hover:bg-slate-50" href="/patients/{{ selected_patient.id }}/charts/pdf?chart_type={{ chart_type }}&lab_test_name={{ chart_lab_test }}">Скачать PDF</a>
+    </div>
+    {% endif %}
+  {% else %}
+    <p class="mt-4 text-sm text-slate-500">Сначала выберите пациента.</p>
+  {% endif %}
+</article>

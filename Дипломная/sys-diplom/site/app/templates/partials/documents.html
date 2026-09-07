@@ -1,0 +1,205 @@
+{% set lab_documents = documents | selectattr("document_type", "equalto", "lab") | list %}
+{% set report_documents = documents | selectattr("document_type", "equalto", "report") | list %}
+{% set grouped_reports = namespace(items=[]) %}
+{% for doctor_type in doctor_type_options %}
+  {% set doctor_documents = report_documents | selectattr("doctor_type", "equalto", doctor_type) | list %}
+  {% set grouped_reports.items = grouped_reports.items + [{"key": doctor_type, "label": doctor_type_labels[doctor_type], "documents": doctor_documents}] %}
+{% endfor %}
+<article
+  id="documents-block"
+  class="rounded-[1.75rem] bg-white p-5 shadow-sm ring-1 ring-slate-200"
+  x-data="{
+    documentTab: 'lab',
+    uploadDocumentType: 'lab',
+    openDoctorGroup: '{{ (grouped_reports.items | selectattr('documents') | list | first).key if grouped_reports.items | selectattr('documents') | list else 'therapist' }}'
+  }"
+>
+  <div class="mb-4">
+    <h2 class="text-xl font-semibold text-slate-900">Документы</h2>
+  </div>
+
+  {% if selected_patient %}
+    {% if selected_patient_can_edit %}
+      <form
+        method="post"
+        action="/documents"
+        enctype="multipart/form-data"
+        hx-post="/documents"
+        hx-target="#documents-block"
+        hx-swap="outerHTML"
+        hx-disabled-elt="button[type='submit']"
+        data-live-form="true"
+        data-success-state="{% if request.headers.get('hx-request') == 'true' and message and not is_error %}true{% else %}false{% endif %}"
+        data-error-state="{% if request.headers.get('hx-request') == 'true' and message and is_error %}true{% else %}false{% endif %}"
+        class="grid gap-3 rounded-[1.5rem] bg-slate-50 p-4"
+      >
+        <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+        <input type="hidden" name="chart_type" value="{{ chart_type }}" />
+        <input type="hidden" name="chart_lab_test" value="{{ chart_lab_test }}" />
+        <input type="hidden" name="history_type" value="{{ history_type }}" />
+        <input type="hidden" name="history_date_from" value="{{ history_date_from }}" />
+        <input type="hidden" name="history_date_to" value="{{ history_date_to }}" />
+        <fieldset class="grid gap-2 rounded-[1.25rem] bg-white p-3 ring-1 ring-slate-200">
+          <legend class="px-1 text-sm font-medium text-slate-700">Тип документа</legend>
+          <label class="flex items-center gap-3 rounded-2xl px-2 py-2 text-sm text-slate-700">
+            <input type="radio" name="document_type" value="lab" required class="h-4 w-4 border-slate-300" x-model="uploadDocumentType" />
+            Анализ
+          </label>
+          <label class="flex items-center gap-3 rounded-2xl px-2 py-2 text-sm text-slate-700">
+            <input type="radio" name="document_type" value="report" required class="h-4 w-4 border-slate-300" x-model="uploadDocumentType" />
+            Выписка врача
+          </label>
+        </fieldset>
+        <label class="block" x-show="uploadDocumentType === 'report'" x-transition.opacity.duration.150ms>
+          <span class="mb-2 block text-sm font-medium text-slate-700">Тип врача</span>
+          <select
+            id="doctor_type"
+            name="doctor_type"
+            class="w-full rounded-2xl border-slate-300 bg-white"
+            :required="uploadDocumentType === 'report'"
+          >
+            <option value="">Выберите врача</option>
+            {% for doctor_type in doctor_type_options %}
+              <option value="{{ doctor_type }}">{{ doctor_type_labels[doctor_type] }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <input id="description" name="description" placeholder="Например, анализ крови или выписка" class="w-full rounded-2xl border-slate-300 bg-white" />
+        <label class="block">
+          <span class="mb-2 block text-sm font-medium text-slate-700">Сделать фото или выбрать файл</span>
+          <span class="mb-2 block text-xs text-slate-500">Поддерживаются PDF, JPG и PNG. Оригинал сохраняется как есть, а обработка добавится позже.</span>
+          <input id="file" name="file" type="file" accept="application/pdf,.pdf,image/*" capture="environment" required class="w-full rounded-2xl border border-slate-300 bg-white p-3" />
+        </label>
+        <button type="submit" class="js-live-submit rounded-2xl bg-teal-700 px-4 py-4 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-70 hover:bg-teal-600">
+          <span class="js-live-idle">Загрузить документ</span>
+          <span class="js-live-loading hidden items-center justify-center gap-2 text-sm font-medium">
+            <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+            Загружаем...
+          </span>
+          <span class="js-live-success hidden">Загружено</span>
+          <span class="js-live-error hidden">Проверьте поля</span>
+        </button>
+        <div class="js-live-status min-h-[1.25rem] text-center text-xs font-semibold text-slate-500"></div>
+      </form>
+    {% else %}
+      <p class="text-sm text-slate-500">В режиме просмотра загрузка и удаление документов отключены.</p>
+    {% endif %}
+
+    {% if request.headers.get("hx-request") == "true" and message %}
+      <div class="mt-4 rounded-2xl border px-4 py-3 text-sm {% if is_error %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-700{% endif %}">
+        {{ message }}
+      </div>
+    {% endif %}
+
+    <div class="mt-4 flex gap-2 rounded-[1.25rem] bg-slate-100 p-1.5 md:hidden">
+      <button type="button" class="flex-1 rounded-2xl px-4 py-3 text-sm font-semibold transition" :class="documentTab === 'lab' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'" @click="documentTab = 'lab'">Анализы</button>
+      <button type="button" class="flex-1 rounded-2xl px-4 py-3 text-sm font-semibold transition" :class="documentTab === 'report' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'" @click="documentTab = 'report'">Выписки</button>
+    </div>
+
+    {% macro render_document_card(doc, type_label, doctor_label=None) %}
+      <div class="flex flex-col gap-3 rounded-2xl border border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="min-w-0">
+          <div class="font-medium text-slate-900">{{ doc.description or doc.original_filename or "Документ" }}</div>
+          <div class="mt-1 text-sm text-slate-500">{{ doc.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+          <div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+            <span>{{ type_label }}</span>
+            {% if doctor_label %}
+              <span>{{ doctor_label }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href="/documents/{{ doc.id }}/file" target="_blank" rel="noopener" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">Открыть файл</a>
+          {% if selected_patient_can_edit %}
+            <form
+              method="post"
+              action="/documents/{{ doc.id }}/delete"
+              hx-post="/documents/{{ doc.id }}/delete"
+              hx-target="#documents-block"
+              hx-swap="outerHTML"
+            >
+              <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+              <input type="hidden" name="chart_type" value="{{ chart_type }}" />
+              <input type="hidden" name="chart_lab_test" value="{{ chart_lab_test }}" />
+              <input type="hidden" name="history_type" value="{{ history_type }}" />
+              <input type="hidden" name="history_date_from" value="{{ history_date_from }}" />
+              <input type="hidden" name="history_date_to" value="{{ history_date_to }}" />
+              <button type="submit" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">Удалить</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% endmacro %}
+
+    <div class="mt-4 hidden gap-4 md:grid md:grid-cols-2">
+      <section class="space-y-3 rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+        <div class="text-sm font-semibold text-slate-900">Анализы</div>
+        {% for doc in lab_documents %}
+          {{ render_document_card(doc, "Анализ") }}
+        {% else %}
+          <p class="text-sm text-slate-500">Анализов пока нет.</p>
+        {% endfor %}
+      </section>
+      <section class="space-y-3 rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+        <div class="text-sm font-semibold text-slate-900">Выписки врача</div>
+        {% if report_documents %}
+          {% for group in grouped_reports.items %}
+            {% if group.documents %}
+              <div class="space-y-3 rounded-[1.25rem] bg-white p-3 ring-1 ring-slate-200">
+                <div class="text-sm font-semibold text-slate-900">{{ group.label }}</div>
+                {% for doc in group.documents %}
+                  {{ render_document_card(doc, "Выписка врача", group.label) }}
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% else %}
+          <p class="text-sm text-slate-500">Выписок пока нет.</p>
+        {% endif %}
+      </section>
+    </div>
+
+    <div class="mt-4 space-y-3 md:hidden">
+      <section x-show="documentTab === 'lab'" x-transition.opacity.duration.150ms class="space-y-3 rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+        <div class="text-sm font-semibold text-slate-900">Анализы</div>
+        {% for doc in lab_documents %}
+          {{ render_document_card(doc, "Анализ") }}
+        {% else %}
+          <p class="text-sm text-slate-500">Анализов пока нет.</p>
+        {% endfor %}
+      </section>
+      <section x-show="documentTab === 'report'" x-transition.opacity.duration.150ms class="space-y-3 rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+        <div class="text-sm font-semibold text-slate-900">Выписки врача</div>
+        {% if report_documents %}
+          <div class="space-y-2">
+            {% for group in grouped_reports.items %}
+              <div class="overflow-hidden rounded-[1.25rem] bg-white ring-1 ring-slate-200">
+                <button
+                  type="button"
+                  class="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+                  @click="openDoctorGroup = openDoctorGroup === '{{ group.key }}' ? '' : '{{ group.key }}'"
+                >
+                  <span class="text-sm font-semibold text-slate-900">{{ group.label }}</span>
+                  <span class="text-xs font-medium text-slate-500">{{ group.documents|length }}</span>
+                </button>
+                <div x-show="openDoctorGroup === '{{ group.key }}'" x-transition.opacity.duration.150ms class="space-y-3 border-t border-slate-200 px-3 py-3">
+                  {% if group.documents %}
+                    {% for doc in group.documents %}
+                      {{ render_document_card(doc, "Выписка врача", group.label) }}
+                    {% endfor %}
+                  {% else %}
+                    <p class="text-sm text-slate-500">Документов пока нет.</p>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-sm text-slate-500">Выписок пока нет.</p>
+        {% endif %}
+      </section>
+    </div>
+  {% else %}
+    <p class="text-sm text-slate-500">Сначала выберите пациента.</p>
+  {% endif %}
+</article>

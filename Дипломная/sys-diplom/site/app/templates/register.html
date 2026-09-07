@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="auth-wrap">
+    <section class="auth-card">
+      <h1>{% if invite %}Присоединиться к семье{% else %}Создать семью{% endif %}</h1>
+      <p class="muted">
+        {% if invite %}
+          Вас пригласили в семейную медкарту. Логин уже закреплён за приглашением.
+        {% elif bootstrap_allowed or allow_registration %}
+          Первый аккаунт создаёт семью и становится владельцем.
+        {% else %}
+          Свободная регистрация отключена. Нужна ссылка-приглашение от владельца семьи.
+        {% endif %}
+      </p>
+      {% if error %}
+        <div class="banner error">{{ error }}</div>
+      {% endif %}
+      {% if not invite and not bootstrap_allowed and not allow_registration %}
+        <p class="small"><a href="/login">Перейти ко входу</a></p>
+      {% else %}
+      <form method="post" action="/register" class="stack">
+        <input type="hidden" name="token" value="{{ token }}" />
+        <div class="field">
+          <label for="login">Логин</label>
+          <input id="login" name="login" type="text" value="{{ invite.login if invite else '' }}" {% if invite %}readonly{% endif %} autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="password">Пароль</label>
+          <input id="password" name="password" type="password" minlength="6" required />
+        </div>
+        <button type="submit">{% if invite %}Присоединиться{% else %}Создать аккаунт{% endif %}</button>
+      </form>
+      {% endif %}
+      <p class="small">Уже есть аккаунт? <a href="/login">Войти</a></p>
+    </section>
+  </main>
+{% endblock %}

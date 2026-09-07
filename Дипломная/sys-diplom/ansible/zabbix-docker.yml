@@ -1,0 +1,29 @@
+---
+- name: Deploy Zabbix Docker files
+  hosts: zabbix
+  become: true
+
+  tasks:
+    - name: Create Zabbix directory
+      ansible.builtin.file:
+        path: /opt/zabbix
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: "0755"
+
+    - name: Copy Docker Compose file
+      ansible.builtin.copy:
+        src: zabbix/compose.yaml
+        dest: /opt/zabbix/compose.yaml
+        owner: ubuntu
+        group: ubuntu
+        mode: "0644"
+
+    - name: Copy environment file
+      ansible.builtin.copy:
+        src: zabbix/.env
+        dest: /opt/zabbix/.env
+        owner: root
+        group: root
+        mode: "0600"

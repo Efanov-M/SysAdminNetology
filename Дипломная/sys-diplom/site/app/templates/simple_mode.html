@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="min-h-screen bg-slate-100">
+    <div class="mx-auto max-w-md px-4 py-4">
+      <section class="rounded-[2rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-xs uppercase tracking-[0.3em] text-slate-500">Простой режим</div>
+            <h1 class="mt-2 text-2xl font-semibold text-slate-900">{{ selected_patient.name if selected_patient else "Выберите пациента" }}</h1>
+          </div>
+          <a href="/{% if selected_patient %}?selected_patient_id={{ selected_patient.id }}{% endif %}" class="rounded-2xl border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700">Полный режим</a>
+        </div>
+
+        {% if patients %}
+          <form method="get" action="/simple" class="mt-4">
+            <select name="selected_patient_id" onchange="this.form.requestSubmit()" class="w-full rounded-2xl border-slate-300 bg-slate-50 p-3 text-base">
+              {% for patient in patients %}
+                <option value="{{ patient.id }}" {% if selected_patient and patient.id == selected_patient.id %}selected{% endif %}>{{ patient.name }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        {% endif %}
+
+        {% if message %}
+          <div class="mt-4 rounded-2xl border px-4 py-3 text-sm font-medium {% if is_error %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-700{% endif %}">
+            {{ message }}
+          </div>
+        {% endif %}
+      </section>
+
+      {% if selected_patient %}
+        <section class="mt-4 space-y-3">
+          {% for insight in simple_insights %}
+            <div class="rounded-[1.5rem] bg-white px-4 py-3 text-sm font-medium text-slate-700 shadow-sm ring-1 ring-slate-200">{{ insight }}</div>
+          {% endfor %}
+        </section>
+
+        <section class="mt-4 space-y-4">
+          {% if selected_patient.patient_type == "child" %}
+            <section class="rounded-[2rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+              <div class="text-sm font-semibold text-slate-900">Детский быстрый режим</div>
+              <div class="mt-1 text-sm text-slate-600">Самое нужное для ребёнка: температура, прививки и детские лекарства.</div>
+              <div class="mt-3 grid gap-3">
+                <div class="rounded-[1.5rem] bg-rose-50 px-4 py-3 ring-1 ring-rose-100">
+                  <div class="text-xs uppercase tracking-[0.24em] text-rose-700">Температура</div>
+                  <div class="mt-2 text-2xl font-semibold text-rose-900">
+                    {% set recent_temperature = health_events | selectattr("temperature", "ne", none) | list | first %}
+                    {{ recent_temperature.temperature ~ " °C" if recent_temperature else "Нет данных" }}
+                  </div>
+                  <div class="mt-1 text-sm text-rose-800">
+                    {% if recent_temperature %}{{ recent_temperature.date.strftime("%d.%m.%Y") }}{% else %}Последняя температура появится здесь{% endif %}
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="rounded-[1.5rem] bg-emerald-50 px-4 py-3 ring-1 ring-emerald-100">
+                    <div class="text-xs uppercase tracking-[0.24em] text-emerald-700">Прививки</div>
+                    <div class="mt-2 text-sm font-semibold text-emerald-900">
+                      {% if child_recent_vaccines %}
+                        {{ child_recent_vaccines[0].name }}
+                      {% else %}
+                        Нет записей
+                      {% endif %}
+                    </div>
+                  </div>
+                  <div class="rounded-[1.5rem] bg-amber-50 px-4 py-3 ring-1 ring-amber-100">
+                    <div class="text-xs uppercase tracking-[0.24em] text-amber-700">Лекарства</div>
+                    <div class="mt-2 text-sm font-semibold text-amber-900">
+                      {% if child_active_medications %}
+                        {{ child_active_medications[0].name }}
+                      {% else %}
+                        Нет активных
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <form method="post" action="/patients/{{ selected_patient.id }}/child-health-events" class="rounded-[2rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+              <input type="hidden" name="next_url" value="/simple?selected_patient_id={{ selected_patient.id }}" />
+              <h2 class="text-xl font-semibold text-slate-900">Температура</h2>
+              <input name="temperature" type="number" step="0.1" inputmode="decimal" placeholder="°C" class="mt-4 w-full rounded-2xl border-slate-300 p-4 text-3xl font-semibold" />
+              <input name="symptoms" placeholder="Симптомы, если нужно" class="mt-3 w-full rounded-2xl border-slate-300 p-4 text-base" />
+              <input name="comment" placeholder="Короткий комментарий" class="mt-3 w-full rounded-2xl border-slate-300 p-4 text-base" />
+              <button type="submit" class="mt-4 w-full rounded-2xl bg-rose-600 px-4 py-4 text-lg font-semibold text-white">Сохранить температуру</button>
+            </form>
+
+            <form method="post" action="/patients/{{ selected_patient.id }}/growth" class="rounded-[2rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+              <input type="hidden" name="next_url" value="/simple?selected_patient_id={{ selected_patient.id }}" />
+              <h2 class="text-xl font-semibold text-slate-900">Рост и вес</h2>
+              <div class="mt-4 grid grid-cols-2 gap-3">
+                <input name="height" type="number" step="0.1" inputmode="decimal" placeholder="Рост, см" class="w-full rounded-2xl border-slate-300 p-4 text-xl font-semibold" />
+                <input name="weight" type="number" step="0.1" inputmode="decimal" placeholder="Вес, кг" class="w-full rounded-2xl border-slate-300 p-4 text-xl font-semibold" />
+              </div>
+              <button type="submit" class="mt-4 w-full rounded-2xl bg-teal-600 px-4 py-4 text-lg font-semibold text-white">Сохранить рост и вес</button>
+            </form>
+
+            <form method="post" action="/patients/{{ selected_patient.id }}/vaccines" class="rounded-[2rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+              <input type="hidden" name="next_url" value="/simple?selected_patient_id={{ selected_patient.id }}" />
+              <h2 class="text-xl font-semibold text-slate-900">Прививка</h2>
+              <div class="mt-4 grid gap-3">
+                <input name="name" required placeholder="Название прививки" class="w-full rounded-2xl border-slate-300 p-4 text-base" />
+                <input name="vaccine_date" type="date" class="w-full rounded-2xl border-slate-300 p-4 text-base" />
+                <select name="status_value" class="w-full rounded-2xl border-slate-300 p-4 text-base">
+                  <option value="planned">Планируется</option>
+                  <option value="done">Сделана</option>
+                </select>
+              </div>
+              <button type="submit" class="mt-4 w-full rounded-2xl bg-emerald-600 px-4 py-4 text-lg font-semibold text-white">Сохранить прививку</button>
+            </form>
+
+            <form method="post" action="/patients/{{ selected_patient.id }}/child-medications" class="rounded-[2rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+              <input type="hidden" name="next_url" value="/simple?selected_patient_id={{ selected_patient.id }}" />
+              <h2 class="text-xl font-semibold text-slate-900">Лекарство</h2>
+              <div class="mt-4 grid gap-3">
+                <input name="name" required placeholder="Название лекарства" class="w-full rounded-2xl border-slate-300 p-4 text-base" />
+                <input name="dosage" placeholder="Дозировка" class="w-full rounded-2xl border-slate-300 p-4 text-base" />
+                <input name="medication_date" type="date" class="w-full rounded-2xl border-slate-300 p-4 text-base" />
+              </div>
+              <button type="submit" class="mt-4 w-full rounded-2xl bg-amber-600 px-4 py-4 text-lg font-semibold text-white">Сохранить лекарство</button>
+            </form>
+
+            <div class="grid grid-cols-2 gap-3">
+              <a href="/extra?selected_patient_id={{ selected_patient.id }}&child_tab=vaccines" class="inline-flex items-center justify-center rounded-[2rem] bg-white px-4 py-4 text-base font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200">Прививки</a>
+              <a href="/extra?selected_patient_id={{ selected_patient.id }}&child_tab=events" class="inline-flex items-center justify-center rounded-[2rem] bg-white px-4 py-4 text-base font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200">События</a>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <a href="/extra?selected_patient_id={{ selected_patient.id }}&child_tab=medications" class="inline-flex items-center justify-center rounded-[2rem] bg-white px-4 py-4 text-base font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200">Лекарства</a>
+              <a href="/inbox" class="inline-flex items-center justify-center rounded-[2rem] bg-white px-4 py-4 text-base font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200">Inbox семьи</a>
+            </div>
+
+            <a href="/patient/emergency?selected_patient_id={{ selected_patient.id }}" class="inline-flex w-full items-center justify-center rounded-[2rem] bg-rose-600 px-4 py-4 text-base font-semibold text-white shadow-sm">
+              Экстренная информация
+            </a>
+          {% else %}
+            <form method="post" action="/blood-pressure" class="rounded-[2rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+              <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+              <h2 class="text-xl font-semibold text-slate-900">Ввести давление</h2>
+              <div class="mt-4 grid gap-3">
+                <input name="sys" type="number" inputmode="numeric" placeholder="SYS" class="w-full rounded-2xl border-slate-300 p-4 text-3xl font-semibold" />
+                <input name="dia" type="number" inputmode="numeric" placeholder="DIA" class="w-full rounded-2xl border-slate-300 p-4 text-3xl font-semibold" />
+                <input name="pulse" type="number" inputmode="numeric" placeholder="PULSE" class="w-full rounded-2xl border-slate-300 p-4 text-3xl font-semibold" />
+              </div>
+              <button type="submit" class="mt-4 w-full rounded-2xl bg-teal-600 px-4 py-4 text-lg font-semibold text-white">Сохранить давление</button>
+            </form>
+
+            <form method="post" action="/observations/quick" class="rounded-[2rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+              <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+              <input type="hidden" name="observation_kind" value="blood_sugar" />
+              <input type="hidden" name="unit" value="ммоль/л" />
+              <h2 class="text-xl font-semibold text-slate-900">Ввести сахар</h2>
+              <input name="value" type="number" step="0.1" inputmode="decimal" placeholder="ммоль/л" class="mt-4 w-full rounded-2xl border-slate-300 p-4 text-3xl font-semibold" />
+              <button type="submit" class="mt-4 w-full rounded-2xl bg-sky-600 px-4 py-4 text-lg font-semibold text-white">Сохранить сахар</button>
+            </form>
+
+            <form method="post" action="/patients/{{ selected_patient.id }}/checkins/medication" class="rounded-[2rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+              <h2 class="text-xl font-semibold text-slate-900">Лекарства</h2>
+              <button type="submit" class="mt-4 w-full rounded-2xl bg-amber-600 px-4 py-4 text-lg font-semibold text-white">Принял лекарства</button>
+            </form>
+
+            <div class="grid grid-cols-2 gap-3">
+              <form method="post" action="/patients/{{ selected_patient.id }}/status">
+                <input type="hidden" name="status_kind" value="ok" />
+                <button type="submit" {% if not signal_actions_enabled %}disabled aria-disabled="true"{% endif %} class="w-full rounded-[2rem] bg-emerald-600 px-4 py-4 text-lg font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600">Я в порядке</button>
+              </form>
+              <form method="post" action="/patients/{{ selected_patient.id }}/status">
+                <input type="hidden" name="status_kind" value="bad" />
+                <button type="submit" {% if not signal_actions_enabled %}disabled aria-disabled="true"{% endif %} class="w-full rounded-[2rem] bg-rose-600 px-4 py-4 text-lg font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-600">Мне плохо</button>
+              </form>
+            </div>
+
+            <section class="rounded-[2rem] {% if matrix_connected %}bg-emerald-50 text-emerald-900 ring-emerald-100{% else %}bg-amber-50 text-amber-900 ring-amber-100{% endif %} p-4 ring-1">
+              <div class="text-sm font-semibold">Matrix: {% if matrix_connected %}подключен{% else %}не подключен{% endif %}</div>
+              {% if not signal_actions_enabled %}
+                <p class="mt-2 text-sm leading-6">Чтобы отправлять сигнал, подключите Matrix.</p>
+                <a href="/account" class="mt-3 inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white">Перейти в настройки</a>
+              {% endif %}
+            </section>
+
+            <div class="grid grid-cols-2 gap-3">
+              <a href="/extra?selected_patient_id={{ selected_patient.id }}" class="inline-flex items-center justify-center rounded-[2rem] bg-white px-4 py-4 text-base font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200">Назначения</a>
+              <a href="/inbox" class="inline-flex items-center justify-center rounded-[2rem] bg-white px-4 py-4 text-base font-semibold text-slate-900 shadow-sm ring-1 ring-slate-200">Inbox семьи</a>
+            </div>
+
+            <a href="/patient/emergency?selected_patient_id={{ selected_patient.id }}" class="inline-flex w-full items-center justify-center rounded-[2rem] bg-rose-600 px-4 py-4 text-base font-semibold text-white shadow-sm">
+              Экстренная информация
+            </a>
+          {% endif %}
+        </section>
+      {% else %}
+        <section class="mt-4 rounded-[2rem] bg-white p-6 text-sm text-slate-500 shadow-sm ring-1 ring-slate-200">
+          Сначала выберите пациента.
+        </section>
+      {% endif %}
+    </div>
+  </main>
+{% endblock %}

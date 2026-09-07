@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page">
+    <section class="hero">
+      <div class="hero-header">
+        <div>
+          <h1>Инциденты очереди уведомлений</h1>
+          <p class="muted">Сгруппировано по каналам доставки для self-hosted диагностики.</p>
+        </div>
+        <a class="btn-secondary btn-link" href="/account/worker-monitor">Назад</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Сводка за период</h2>
+      <div><strong>Retention-инцидентов:</strong> {{ retention_summary.total }}</div>
+      <div class="small muted">
+        По каналам:
+        {% for channel, count in retention_summary.by_channel.items() %}
+          {{ channel }}={{ count }}{% if not loop.last %}, {% endif %}
+        {% else %}
+          нет истории
+        {% endfor %}
+      </div>
+      {% if degradation_warnings %}
+        <div class="banner error">{{ degradation_warnings|join(" • ") }}</div>
+      {% endif %}
+    </section>
+
+    {% for channel, items in incidents_by_channel.items() %}
+      <section class="card">
+        <h2>{{ channel }}</h2>
+        <div class="list">
+          {% for item in items %}
+            <div class="list-item">
+              <div><strong>{{ item.incident_type }}</strong> • {{ item.recipient_email or "default" }}</div>
+              <div class="small">Попыток: {{ item.attempts }} • Следующая: {{ item.next_retry_at }}</div>
+              <div class="small muted">{{ item.error }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% else %}
+      <section class="card"><p class="muted">Инцидентов по каналам сейчас нет.</p></section>
+    {% endfor %}
+  </main>
+{% endblock %}

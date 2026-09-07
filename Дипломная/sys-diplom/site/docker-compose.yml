@@ -1,0 +1,67 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: phr
+      POSTGRES_USER: phr
+      POSTGRES_PASSWORD: phr
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U phr -d phr"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+      - uploads_data:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  notification-worker:
+    build: .
+    command: ["python", "-m", "app.workers.notification_queue_worker"]
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+      - uploads_data:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  matrix-bot:
+    build: ./matrix-bot
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MATRIX_HOMESERVER: "https://matrix.efanov.online"
+      MATRIX_BOT_USER_ID: "@phr-bot:matrix.efanov.online"
+      BACKEND_URL: "http://web:8000"
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
+  uploads_data:

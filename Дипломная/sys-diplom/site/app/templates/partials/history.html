@@ -1,0 +1,332 @@
+<article id="history-block" class="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-200">
+  <div class="border-b border-slate-200 p-5">
+    <h2 class="text-2xl font-semibold text-slate-900">История</h2>
+    <p class="mt-1 text-sm text-slate-500">Таблица записей с простыми фильтрами и удалением.</p>
+  </div>
+
+  {% if selected_patient %}
+    <form
+      method="get"
+      action="/partials/history"
+      hx-get="/partials/history"
+      hx-target="#history-block"
+      hx-swap="outerHTML"
+      class="grid gap-3 bg-slate-50 p-4 lg:grid-cols-[1.3fr_1fr_1fr_1fr_auto]"
+    >
+      <input type="hidden" name="selected_patient_id" value="{{ selected_patient.id }}" />
+      <input type="hidden" name="chart_type" value="{{ chart_type }}" />
+      <input type="hidden" name="chart_lab_test" value="{{ chart_lab_test }}" />
+      <input type="hidden" name="date_preset" value="{{ date_preset }}" />
+
+      <label class="block lg:col-span-2">
+        <span class="mb-1 block text-sm font-medium text-slate-600">Что показать</span>
+        <select id="history_type" name="history_type" class="w-full rounded-2xl border-slate-300">
+          <option value="" {% if not history_type %}selected{% endif %}>Все записи</option>
+          <option value="blood_pressure" {% if history_type == "blood_pressure" %}selected{% endif %}>Давление</option>
+          <option value="blood_sugar" {% if history_type == "blood_sugar" %}selected{% endif %}>Сахар</option>
+          <option value="temperature" {% if history_type == "temperature" %}selected{% endif %}>Температура</option>
+          <option value="weight" {% if history_type == "weight" %}selected{% endif %}>Вес</option>
+          <option value="lab_result" {% if history_type == "lab_result" %}selected{% endif %}>Анализы</option>
+        </select>
+      </label>
+
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-600">С даты</span>
+        <input id="history_date_from" name="history_date_from" type="date" value="{{ history_date_from }}" class="w-full rounded-2xl border-slate-300" />
+      </label>
+
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-600">По дату</span>
+        <input id="history_date_to" name="history_date_to" type="date" value="{{ history_date_to }}" class="w-full rounded-2xl border-slate-300" />
+      </label>
+
+      <label class="block">
+        <span class="mb-1 block text-sm font-medium text-slate-600">Сортировка</span>
+        <select id="history_sort" name="history_sort" class="w-full rounded-2xl border-slate-300">
+          <option value="desc" {% if history_sort != 'asc' %}selected{% endif %}>Сначала новые</option>
+          <option value="asc" {% if history_sort == 'asc' %}selected{% endif %}>Сначала старые</option>
+        </select>
+      </label>
+
+      <div class="flex items-end gap-2">
+        <button type="submit" class="w-full rounded-2xl bg-slate-900 px-4 py-3 text-sm font-medium text-white">Применить</button>
+      </div>
+    </form>
+
+    <div class="flex flex-wrap gap-2 border-b border-slate-200 px-5 py-4">
+      <button hx-get="/partials/history?selected_patient_id={{ selected_patient.id }}&history_type={{ history_type }}&date_preset=today&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}&history_sort={{ history_sort }}" hx-target="#history-block" hx-swap="outerHTML" type="button" class="rounded-full px-3 py-2 text-xs font-semibold {% if date_preset == 'today' %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Сегодня</button>
+      <button hx-get="/partials/history?selected_patient_id={{ selected_patient.id }}&history_type={{ history_type }}&date_preset=7d&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}&history_sort={{ history_sort }}" hx-target="#history-block" hx-swap="outerHTML" type="button" class="rounded-full px-3 py-2 text-xs font-semibold {% if date_preset == '7d' %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Неделя</button>
+      <button hx-get="/partials/history?selected_patient_id={{ selected_patient.id }}&history_type={{ history_type }}&date_preset=30d&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}&history_sort={{ history_sort }}" hx-target="#history-block" hx-swap="outerHTML" type="button" class="rounded-full px-3 py-2 text-xs font-semibold {% if date_preset == '30d' %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Месяц</button>
+      <button hx-get="/partials/history?selected_patient_id={{ selected_patient.id }}&history_type={{ history_type }}&date_preset=90d&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}&history_sort={{ history_sort }}" hx-target="#history-block" hx-swap="outerHTML" type="button" class="rounded-full px-3 py-2 text-xs font-semibold {% if date_preset == '90d' %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">90 дней</button>
+      <button hx-get="/partials/history?selected_patient_id={{ selected_patient.id }}&history_type={{ history_type }}&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}&history_sort={{ history_sort }}" hx-target="#history-block" hx-swap="outerHTML" type="button" class="rounded-full px-3 py-2 text-xs font-semibold {% if not date_preset %}bg-slate-900 text-white{% else %}bg-slate-100 text-slate-700 hover:bg-slate-200{% endif %}">Все даты</button>
+    </div>
+
+    {% if request.headers.get("hx-request") == "true" and message %}
+      <div class="mx-5 mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ message }}</div>
+    {% endif %}
+
+    <div
+      class="px-5 py-4"
+      hx-get="/partials/history?selected_patient_id={{ selected_patient.id }}&history_type={{ history_type }}&history_date_from={{ history_date_from }}&history_date_to={{ history_date_to }}&history_sort={{ history_sort }}&date_preset={{ date_preset }}&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}"
+      hx-trigger="historyChanged from:body"
+      hx-target="#history-block"
+      hx-swap="outerHTML"
+    >
+      <div class="space-y-3 md:hidden">
+        {% for item in observations %}
+          <div class="rounded-[1.5rem] border border-slate-200 p-4 shadow-sm" x-data="{ editing: false }">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-xs uppercase tracking-[0.24em] text-slate-400">{{ item.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+                <div class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold
+                  {% if item.type == 'blood_pressure' %}bg-teal-100 text-teal-800{% elif item.type == 'blood_sugar' %}bg-sky-100 text-sky-800{% elif item.type == 'temperature' %}bg-amber-100 text-amber-800{% elif item.type == 'weight' %}bg-violet-100 text-violet-800{% else %}bg-violet-100 text-violet-800{% endif %}">
+                  {% if item.type == "blood_pressure" %}Давление{% elif item.type == "blood_sugar" %}Сахар{% elif item.type == "temperature" %}Температура{% elif item.type == "weight" %}Вес{% elif item.type == "lab_result" %}Анализ{% else %}{{ item.type }}{% endif %}
+                </div>
+              </div>
+              {% if selected_patient_can_edit %}
+                <div class="flex gap-2">
+                  <button type="button" class="rounded-xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200" @click="editing = !editing">Изменить</button>
+                  <form
+                    method="post"
+                    action="{% if item.entry_kind == 'lab_result' %}/lab-results/{{ item.id }}/delete{% else %}/observations/{{ item.id }}/delete{% endif %}"
+                    hx-post="{% if item.entry_kind == 'lab_result' %}/lab-results/{{ item.id }}/delete{% else %}/observations/{{ item.id }}/delete{% endif %}"
+                    hx-target="#history-block"
+                    hx-swap="outerHTML"
+                  >
+                    <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+                    <input type="hidden" name="history_type" value="{{ history_type }}" />
+                    <input type="hidden" name="history_date_from" value="{{ history_date_from }}" />
+                    <input type="hidden" name="history_date_to" value="{{ history_date_to }}" />
+                    <input type="hidden" name="history_sort" value="{{ history_sort }}" />
+                    <input type="hidden" name="chart_type" value="{{ chart_type }}" />
+                    <input type="hidden" name="chart_lab_test" value="{{ chart_lab_test }}" />
+                    <button type="submit" class="rounded-xl bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100" onclick="return confirm('Удалить запись из истории?')">Удалить</button>
+                  </form>
+                </div>
+              {% endif %}
+            </div>
+            <div class="mt-4 text-2xl font-semibold text-slate-900">
+              {% if item.type == "blood_pressure" %}
+                {{ item.value.sys }}/{{ item.value.dia }}
+              {% elif item.type == "blood_sugar" %}
+                {{ item.value.value }} {{ item.value.unit or "" }}
+              {% elif item.type == "temperature" %}
+                {{ item.value.value }} {{ item.value.unit or "" }}
+              {% elif item.type == "weight" %}
+                {{ item.value.value }} {{ item.value.unit or "kg" }}
+              {% elif item.type == "lab_result" %}
+                {{ item.value.value }} {{ item.value.unit or "" }}
+              {% else %}
+                {{ item.type }}
+              {% endif %}
+            </div>
+            <div class="mt-2 text-sm text-slate-600">
+              {% if item.type == "blood_pressure" %}
+                Пульс: {{ item.value.pulse or "не указан" }}
+                <div class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold {% if item.value.sys >= 140 or item.value.dia >= 90 %}bg-rose-100 text-rose-700{% elif item.value.sys < 90 or item.value.dia < 60 %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                  {% if item.value.sys >= 140 or item.value.dia >= 90 %}Выше нормы{% elif item.value.sys < 90 or item.value.dia < 60 %}Ниже нормы{% else %}В пределах нормы{% endif %}
+                </div>
+              {% elif item.type == "weight" %}
+                {{ item.value.label or "Масса тела" }}
+              {% elif item.type == "blood_sugar" %}
+                {{ item.value.label or "Без заметки" }}
+              {% elif item.type == "temperature" %}
+                {{ item.value.label or "Без заметки" }}
+              {% elif item.type == "lab_result" %}
+                {{ item.value.test_name }}
+              {% endif %}
+            </div>
+            {% if selected_patient_can_edit %}
+              <div class="mt-4" x-show="editing" x-transition>
+                {% if item.entry_kind == "lab_result" %}
+                  <form method="post" action="/lab-results/{{ item.id }}/update" hx-post="/lab-results/{{ item.id }}/update" hx-target="#history-block" hx-swap="outerHTML" class="grid gap-3 rounded-[1.25rem] bg-slate-50 p-3 ring-1 ring-slate-200">
+                    <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+                    <input type="hidden" name="history_type" value="{{ history_type }}" />
+                    <input type="hidden" name="history_date_from" value="{{ history_date_from }}" />
+                    <input type="hidden" name="history_date_to" value="{{ history_date_to }}" />
+                    <input type="hidden" name="history_sort" value="{{ history_sort }}" />
+                    <input type="hidden" name="chart_type" value="{{ chart_type }}" />
+                    <input type="hidden" name="chart_lab_test" value="{{ chart_lab_test }}" />
+                    <input name="panel_name" value="{{ item.value.panel_name or '' }}" placeholder="Панель" class="w-full rounded-2xl border-slate-300" />
+                    <input name="test_name" value="{{ item.value.test_name }}" placeholder="Показатель" class="w-full rounded-2xl border-slate-300" />
+                    <input name="value" type="number" step="0.01" value="{{ item.value.value }}" placeholder="Значение" class="w-full rounded-2xl border-slate-300" />
+                    <input name="unit" value="{{ item.value.unit or '' }}" placeholder="Единицы" class="w-full rounded-2xl border-slate-300" />
+                    <button type="submit" class="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white">Сохранить изменения</button>
+                  </form>
+                {% else %}
+                  <form method="post" action="/observations/{{ item.id }}/update" hx-post="/observations/{{ item.id }}/update" hx-target="#history-block" hx-swap="outerHTML" class="grid gap-3 rounded-[1.25rem] bg-slate-50 p-3 ring-1 ring-slate-200">
+                    <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+                    <input type="hidden" name="observation_type" value="{{ item.type }}" />
+                    <input type="hidden" name="history_type" value="{{ history_type }}" />
+                    <input type="hidden" name="history_date_from" value="{{ history_date_from }}" />
+                    <input type="hidden" name="history_date_to" value="{{ history_date_to }}" />
+                    <input type="hidden" name="history_sort" value="{{ history_sort }}" />
+                    <input type="hidden" name="chart_type" value="{{ chart_type }}" />
+                    <input type="hidden" name="chart_lab_test" value="{{ chart_lab_test }}" />
+                    {% if item.type == "blood_pressure" %}
+                      <div class="grid gap-3 grid-cols-3">
+                        <input name="sys" type="number" value="{{ item.value.sys }}" placeholder="SYS" class="w-full rounded-2xl border-slate-300" />
+                        <input name="dia" type="number" value="{{ item.value.dia }}" placeholder="DIA" class="w-full rounded-2xl border-slate-300" />
+                        <input name="pulse" type="number" value="{{ item.value.pulse or '' }}" placeholder="PULSE" class="w-full rounded-2xl border-slate-300" />
+                      </div>
+                    {% else %}
+                      <input name="value" type="number" step="0.1" value="{{ item.value.value }}" placeholder="Значение" class="w-full rounded-2xl border-slate-300" />
+                      <input name="unit" value="{{ item.value.unit or '' }}" placeholder="Единицы" class="w-full rounded-2xl border-slate-300" />
+                      <input name="label" value="{{ item.value.label or '' }}" placeholder="Заметка" class="w-full rounded-2xl border-slate-300" />
+                    {% endif %}
+                    <button type="submit" class="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white">Сохранить изменения</button>
+                  </form>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        {% else %}
+          <div class="rounded-[1.5rem] border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">Пока нет ни одной записи.</div>
+        {% endfor %}
+      </div>
+
+      <div class="hidden overflow-hidden rounded-[1.5rem] border border-slate-200 md:block">
+        <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+          <thead class="bg-slate-50 text-left text-slate-500">
+            <tr>
+              <th class="px-4 py-3 font-medium">Дата</th>
+              <th class="px-4 py-3 font-medium">Тип</th>
+              <th class="px-4 py-3 font-medium">Показатель</th>
+              <th class="px-4 py-3 font-medium">Детали</th>
+              {% if selected_patient_can_edit %}
+                <th class="px-4 py-3 font-medium text-right">Действия</th>
+              {% endif %}
+            </tr>
+          </thead>
+            {% for item in observations %}
+              <tbody class="divide-y divide-slate-100 bg-white" x-data="{ editing: false }">
+              <tr class="align-top transition hover:bg-slate-50">
+                <td class="px-4 py-4 whitespace-nowrap text-slate-600">{{ item.created_at.strftime("%d.%m.%Y %H:%M") }}</td>
+                <td class="px-4 py-4">
+                  <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold
+                    {% if item.type == 'blood_pressure' %}bg-teal-100 text-teal-800{% elif item.type == 'blood_sugar' %}bg-sky-100 text-sky-800{% elif item.type == 'temperature' %}bg-amber-100 text-amber-800{% elif item.type == 'weight' %}bg-violet-100 text-violet-800{% else %}bg-violet-100 text-violet-800{% endif %}">
+                    {% if item.type == "blood_pressure" %}Давление{% elif item.type == "blood_sugar" %}Сахар{% elif item.type == "temperature" %}Температура{% elif item.type == "weight" %}Вес{% elif item.type == "lab_result" %}Анализ{% else %}{{ item.type }}{% endif %}
+                  </span>
+                </td>
+                <td class="px-4 py-4 text-base font-semibold text-slate-900">
+                  {% if item.type == "blood_pressure" %}
+                    {{ item.value.sys }}/{{ item.value.dia }}
+                  {% elif item.type == "blood_sugar" %}
+                    {{ item.value.value }} {{ item.value.unit or "" }}
+                  {% elif item.type == "temperature" %}
+                    {{ item.value.value }} {{ item.value.unit or "" }}
+                  {% elif item.type == "weight" %}
+                    {{ item.value.value }} {{ item.value.unit or "kg" }}
+                  {% elif item.type == "lab_result" %}
+                    {{ item.value.test_name }}: {{ item.value.value }} {{ item.value.unit or "" }}
+                  {% else %}
+                    {{ item.type }}
+                  {% endif %}
+                </td>
+                <td class="px-4 py-4 text-slate-600">
+                  {% if item.type == "blood_pressure" %}
+                    {% if item.value.pulse %}Пульс {{ item.value.pulse }}{% else %}Без пульса{% endif %}
+                    <div class="mt-2 inline-flex rounded-full px-3 py-1 text-xs font-semibold {% if item.value.sys >= 140 or item.value.dia >= 90 %}bg-rose-100 text-rose-700{% elif item.value.sys < 90 or item.value.dia < 60 %}bg-amber-100 text-amber-700{% else %}bg-emerald-100 text-emerald-700{% endif %}">
+                      {% if item.value.sys >= 140 or item.value.dia >= 90 %}Выше нормы{% elif item.value.sys < 90 or item.value.dia < 60 %}Ниже нормы{% else %}В пределах нормы{% endif %}
+                    </div>
+                  {% elif item.type in ["blood_sugar", "temperature", "weight"] %}
+                    {{ item.value.label or "Без заметки" }}
+                  {% elif item.type == "lab_result" %}
+                    {% if item.value.panel_name %}
+                      <div>{{ item.value.panel_name }}</div>
+                    {% endif %}
+                    {% if item.value.reference_low is not none or item.value.reference_high is not none %}
+                      <div class="text-xs">Норма: {% if item.value.reference_low is not none %}{{ item.value.reference_low }}{% endif %}{% if item.value.reference_high is not none %} - {{ item.value.reference_high }}{% endif %} {{ item.value.unit or "" }}</div>
+                    {% elif item.value.reference_text %}
+                      <div class="text-xs">Норма: {{ item.value.reference_text }}</div>
+                    {% endif %}
+                    <div class="mt-1 text-xs {% if item.value.status == 'high' %}text-rose-600{% elif item.value.status == 'low' %}text-amber-600{% else %}text-emerald-600{% endif %}">
+                      {% if item.value.status == "low" %}Ниже нормы{% elif item.value.status == "high" %}Выше нормы{% else %}В пределах нормы{% endif %}
+                    </div>
+                  {% endif %}
+                </td>
+                {% if selected_patient_can_edit %}
+                  <td class="px-4 py-4 text-right">
+                    <div class="flex justify-end gap-2">
+                      <button type="button" class="rounded-xl bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-200" @click="editing = !editing">Изменить</button>
+                      <form
+                        method="post"
+                        action="{% if item.entry_kind == 'lab_result' %}/lab-results/{{ item.id }}/delete{% else %}/observations/{{ item.id }}/delete{% endif %}"
+                        hx-post="{% if item.entry_kind == 'lab_result' %}/lab-results/{{ item.id }}/delete{% else %}/observations/{{ item.id }}/delete{% endif %}"
+                        hx-target="#history-block"
+                        hx-swap="outerHTML"
+                      >
+                        <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+                        <input type="hidden" name="history_type" value="{{ history_type }}" />
+                        <input type="hidden" name="history_date_from" value="{{ history_date_from }}" />
+                        <input type="hidden" name="history_date_to" value="{{ history_date_to }}" />
+                        <input type="hidden" name="history_sort" value="{{ history_sort }}" />
+                        <input type="hidden" name="chart_type" value="{{ chart_type }}" />
+                        <input type="hidden" name="chart_lab_test" value="{{ chart_lab_test }}" />
+                        <button type="submit" class="rounded-xl bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100" onclick="return confirm('Удалить запись из истории?')">Удалить</button>
+                      </form>
+                    </div>
+                  </td>
+                {% endif %}
+              </tr>
+              {% if selected_patient_can_edit %}
+                <tr x-show="editing" x-transition>
+                  <td colspan="{% if selected_patient_can_edit %}5{% else %}4{% endif %}" class="px-4 pb-4">
+                    {% if item.entry_kind == "lab_result" %}
+                      <form method="post" action="/lab-results/{{ item.id }}/update" hx-post="/lab-results/{{ item.id }}/update" hx-target="#history-block" hx-swap="outerHTML" class="grid gap-3 rounded-[1.25rem] bg-slate-50 p-4 ring-1 ring-slate-200 md:grid-cols-4">
+                        <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+                        <input type="hidden" name="history_type" value="{{ history_type }}" />
+                        <input type="hidden" name="history_date_from" value="{{ history_date_from }}" />
+                        <input type="hidden" name="history_date_to" value="{{ history_date_to }}" />
+                        <input type="hidden" name="history_sort" value="{{ history_sort }}" />
+                        <input type="hidden" name="chart_type" value="{{ chart_type }}" />
+                        <input type="hidden" name="chart_lab_test" value="{{ chart_lab_test }}" />
+                        <input name="panel_name" value="{{ item.value.panel_name or '' }}" placeholder="Панель" class="w-full rounded-2xl border-slate-300" />
+                        <input name="test_name" value="{{ item.value.test_name }}" placeholder="Показатель" class="w-full rounded-2xl border-slate-300" />
+                        <input name="value" type="number" step="0.01" value="{{ item.value.value }}" placeholder="Значение" class="w-full rounded-2xl border-slate-300" />
+                        <input name="unit" value="{{ item.value.unit or '' }}" placeholder="Единицы" class="w-full rounded-2xl border-slate-300" />
+                        <button type="submit" class="md:col-span-4 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white">Сохранить изменения</button>
+                      </form>
+                    {% else %}
+                      <form method="post" action="/observations/{{ item.id }}/update" hx-post="/observations/{{ item.id }}/update" hx-target="#history-block" hx-swap="outerHTML" class="grid gap-3 rounded-[1.25rem] bg-slate-50 p-4 ring-1 ring-slate-200 md:grid-cols-4">
+                        <input type="hidden" name="patient_id" value="{{ selected_patient.id }}" />
+                        <input type="hidden" name="observation_type" value="{{ item.type }}" />
+                        <input type="hidden" name="history_type" value="{{ history_type }}" />
+                        <input type="hidden" name="history_date_from" value="{{ history_date_from }}" />
+                        <input type="hidden" name="history_date_to" value="{{ history_date_to }}" />
+                        <input type="hidden" name="history_sort" value="{{ history_sort }}" />
+                        <input type="hidden" name="chart_type" value="{{ chart_type }}" />
+                        <input type="hidden" name="chart_lab_test" value="{{ chart_lab_test }}" />
+                        {% if item.type == "blood_pressure" %}
+                          <input name="sys" type="number" value="{{ item.value.sys }}" placeholder="SYS" class="w-full rounded-2xl border-slate-300" />
+                          <input name="dia" type="number" value="{{ item.value.dia }}" placeholder="DIA" class="w-full rounded-2xl border-slate-300" />
+                          <input name="pulse" type="number" value="{{ item.value.pulse or '' }}" placeholder="PULSE" class="w-full rounded-2xl border-slate-300" />
+                          <div></div>
+                        {% else %}
+                          <input name="value" type="number" step="0.1" value="{{ item.value.value }}" placeholder="Значение" class="w-full rounded-2xl border-slate-300" />
+                          <input name="unit" value="{{ item.value.unit or '' }}" placeholder="Единицы" class="w-full rounded-2xl border-slate-300" />
+                          <input name="label" value="{{ item.value.label or '' }}" placeholder="Заметка" class="w-full rounded-2xl border-slate-300 md:col-span-2" />
+                        {% endif %}
+                        <button type="submit" class="md:col-span-4 rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white">Сохранить изменения</button>
+                      </form>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endif %}
+              </tbody>
+            {% else %}
+              <tbody class="bg-white">
+                <tr>
+                  <td colspan="{% if selected_patient_can_edit %}5{% else %}4{% endif %}" class="px-4 py-8 text-center text-sm text-slate-500">Пока нет ни одной записи.</td>
+                </tr>
+              </tbody>
+            {% endfor %}
+        </table>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <p class="text-sm text-slate-500">Сначала выберите пациента.</p>
+  {% endif %}
+</article>

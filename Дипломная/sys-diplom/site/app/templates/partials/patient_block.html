@@ -1,0 +1,209 @@
+<div id="patient-block" class="space-y-4 xl:sticky xl:top-4">
+  <article class="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-200">
+    <div class="border-b border-slate-200 bg-slate-50 p-5 text-slate-950">
+      <div class="flex items-start justify-between gap-3">
+        <div class="pt-1">
+          <p class="text-[11px] uppercase tracking-[0.35em] text-slate-600">Пациент</p>
+          <h2 class="mt-3 text-2xl font-semibold leading-tight text-slate-950">{{ selected_patient.name if selected_patient else "Семья" }}</h2>
+        </div>
+        {% if selected_patient and selected_patient_can_edit and not patient_edit_mode %}
+          <button
+            type="button"
+            class="shrink-0 rounded-2xl bg-teal-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-600"
+            hx-get="/partials/patient-block?selected_patient_id={{ selected_patient.id }}&current_screen={{ current_screen }}&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}&history_type={{ history_type }}&history_date_from={{ history_date_from }}&history_date_to={{ history_date_to }}&history_sort={{ history_sort }}&date_preset={{ date_preset }}&child_tab={{ child_tab }}&edit_patient=true"
+            hx-target="#patient-block"
+            hx-swap="outerHTML"
+          >
+            Редактировать
+          </button>
+        {% endif %}
+      </div>
+      {% if selected_patient %}
+        <div class="mt-3 inline-flex rounded-full bg-slate-200 px-3 py-1 text-xs font-medium text-slate-800">
+          {{ "Ребёнок" if selected_patient.patient_type == "child" else "Взрослый" }}
+        </div>
+      {% endif %}
+
+      {% if patients|length > 1 %}
+        <form method="get" action="/" class="mt-4 max-w-xs rounded-[1.25rem] bg-white/80 p-3 ring-1 ring-slate-200">
+          <input type="hidden" name="screen" value="{{ current_screen }}" />
+          {% if current_screen == "chart" %}
+            <input type="hidden" name="chart_type" value="{{ chart_type }}" />
+            <input type="hidden" name="date_preset" value="{{ date_preset }}" />
+            {% if chart_lab_test %}
+              <input type="hidden" name="chart_lab_test" value="{{ chart_lab_test }}" />
+            {% endif %}
+          {% endif %}
+          {% if current_screen == "history" %}
+            <input type="hidden" name="history_type" value="{{ history_type }}" />
+            <input type="hidden" name="history_date_from" value="{{ history_date_from }}" />
+            <input type="hidden" name="history_date_to" value="{{ history_date_to }}" />
+            <input type="hidden" name="history_sort" value="{{ history_sort }}" />
+          {% endif %}
+          {% if child_tab %}
+            <input type="hidden" name="child_tab" value="{{ child_tab }}" />
+          {% endif %}
+          <label for="selected-patient-switcher" class="mb-2 block text-xs font-semibold uppercase tracking-[0.24em] text-slate-600">Выбрать пациента</label>
+          <div class="flex items-center gap-2">
+            <select
+              id="selected-patient-switcher"
+              name="selected_patient_id"
+              onchange="this.form.submit()"
+              class="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+            >
+              {% for patient in patients %}
+                <option value="{{ patient.id }}" {% if selected_patient and patient.id == selected_patient.id %}selected{% endif %}>
+                  {{ patient.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </form>
+      {% endif %}
+
+      {% if selected_patient %}
+        {% if patient_edit_mode and selected_patient_can_edit %}
+          <form
+            method="post"
+            action="/patients/{{ selected_patient.id }}/update"
+            hx-post="/patients/{{ selected_patient.id }}/update"
+            hx-target="#patient-block"
+            hx-swap="outerHTML"
+            class="mt-4 space-y-3"
+          >
+            <input type="hidden" name="current_screen" value="{{ current_screen }}" />
+            <input type="hidden" name="chart_type" value="{{ chart_type }}" />
+            <input type="hidden" name="chart_lab_test" value="{{ chart_lab_test }}" />
+            <input type="hidden" name="history_type" value="{{ history_type }}" />
+            <input type="hidden" name="history_date_from" value="{{ history_date_from }}" />
+            <input type="hidden" name="history_date_to" value="{{ history_date_to }}" />
+            <input type="hidden" name="history_sort" value="{{ history_sort }}" />
+            <input type="hidden" name="date_preset" value="{{ date_preset }}" />
+            <input type="hidden" name="child_tab" value="{{ child_tab }}" />
+            <div>
+              <label for="patient_name" class="mb-1 block text-sm font-medium text-slate-800">Имя</label>
+              <input id="patient_name" name="name" value="{{ selected_patient.name }}" required class="w-full rounded-2xl border border-slate-300 bg-white p-4 text-base text-slate-950 placeholder:text-slate-400" />
+            </div>
+            <div>
+              <label for="patient_date_of_birth" class="mb-1 block text-sm font-medium text-slate-800">Дата рождения</label>
+              <input id="patient_date_of_birth" name="date_of_birth" type="date" value="{{ selected_patient.date_of_birth.isoformat() if selected_patient.date_of_birth else '' }}" class="w-full rounded-2xl border border-slate-300 bg-white p-4 text-base text-slate-950" />
+            </div>
+            <div>
+              <label for="patient_notes" class="mb-1 block text-sm font-medium text-slate-800">Заметки</label>
+              <textarea id="patient_notes" name="notes" rows="3" class="w-full rounded-2xl border border-slate-300 bg-white p-4 text-base text-slate-950 placeholder:text-slate-400">{{ selected_patient.notes or '' }}</textarea>
+            </div>
+            <div>
+              <label for="patient_weight" class="mb-1 block text-sm font-medium text-slate-800">Вес</label>
+              <input id="patient_weight" name="weight" type="number" step="0.1" value="{{ selected_patient.weight }}" class="w-full rounded-2xl border border-slate-300 bg-white p-4 text-base text-slate-950" />
+            </div>
+            <div>
+              <label for="patient_emergency_contact_name" class="mb-1 block text-sm font-medium text-slate-800">Контакт: имя</label>
+              <input id="patient_emergency_contact_name" name="emergency_contact_name" value="{{ selected_patient.emergency_contact_name or '' }}" class="w-full rounded-2xl border border-slate-300 bg-white p-4 text-base text-slate-950 placeholder:text-slate-400" />
+            </div>
+            <div>
+              <label for="patient_emergency_contact_phone" class="mb-1 block text-sm font-medium text-slate-800">Контакт: телефон</label>
+              <input id="patient_emergency_contact_phone" name="emergency_contact_phone" value="{{ selected_patient.emergency_contact_phone or '' }}" class="w-full rounded-2xl border border-slate-300 bg-white p-4 text-base text-slate-950 placeholder:text-slate-400" />
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <button type="submit" class="rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-600">Сохранить</button>
+              <button
+                type="button"
+                class="rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-800"
+                hx-get="/partials/patient-block?selected_patient_id={{ selected_patient.id }}&current_screen={{ current_screen }}&chart_type={{ chart_type }}&chart_lab_test={{ chart_lab_test }}&history_type={{ history_type }}&history_date_from={{ history_date_from }}&history_date_to={{ history_date_to }}&history_sort={{ history_sort }}&date_preset={{ date_preset }}&child_tab={{ child_tab }}"
+                hx-target="#patient-block"
+                hx-swap="outerHTML"
+              >
+                Отмена
+              </button>
+            </div>
+          </form>
+        {% else %}
+          <div class="mt-4 grid gap-3 2xl:grid-cols-2">
+            <div class="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+              <div class="text-xs uppercase tracking-[0.24em] text-slate-600">Возраст</div>
+              <div class="mt-1 text-base font-semibold text-slate-950">{{ patient_age if patient_age is not none else "Не указан" }}</div>
+            </div>
+            <div class="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+              <div class="text-xs uppercase tracking-[0.24em] text-slate-600">Вес</div>
+              <div class="mt-1 text-base font-semibold text-slate-950">{{ "%.1f"|format(selected_patient.weight) }} кг</div>
+            </div>
+            <div class="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+              <div class="text-xs uppercase tracking-[0.24em] text-slate-600">Тип</div>
+              <div class="mt-1 text-base font-semibold text-slate-950">{{ "Ребёнок" if selected_patient.patient_type == "child" else "Взрослый" }}</div>
+            </div>
+            <div class="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+              <div class="text-xs uppercase tracking-[0.24em] text-slate-600">Дата рождения</div>
+              <div class="mt-1 text-base font-semibold text-slate-950">{% if selected_patient.date_of_birth %}{{ selected_patient.date_of_birth.strftime("%d.%m.%Y") }}{% else %}Не указана{% endif %}</div>
+            </div>
+            <div class="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200 sm:col-span-2">
+              <div class="text-xs uppercase tracking-[0.24em] text-slate-600">Контакты</div>
+              <div class="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-slate-950">
+                {% if selected_patient.emergency_contact_name or selected_patient.emergency_contact_phone %}
+                  {{ selected_patient.emergency_contact_name or "Контакт" }}{% if selected_patient.emergency_contact_phone %} • {{ selected_patient.emergency_contact_phone }}{% endif %}
+                {% else %}
+                  {{ emergency_info.emergency_contacts or "Не указаны" }}
+                {% endif %}
+              </div>
+            </div>
+            <div class="rounded-[1.25rem] bg-slate-50 p-4 ring-1 ring-slate-200 sm:col-span-2">
+              <div class="flex items-start justify-between gap-3">
+                <div class="text-xs uppercase tracking-[0.24em] text-slate-600">Данные пациента и экстренная информация</div>
+                {% if selected_patient_can_edit %}
+                  <a href="/patient/emergency?selected_patient_id={{ selected_patient.id }}" class="shrink-0 rounded-2xl bg-white px-4 py-2.5 text-sm font-semibold text-teal-800 ring-1 ring-slate-200 hover:bg-slate-100">
+                    Редактировать
+                  </a>
+                {% endif %}
+              </div>
+              <div class="mt-3 space-y-2 text-sm leading-6 text-slate-950">
+                <div><span class="font-semibold text-slate-700">Группа крови:</span> {{ emergency_info.blood_type or "Не указана" }}</div>
+                <div><span class="font-semibold text-slate-700">Аллергии:</span> {{ emergency_info.allergies or "Нет данных" }}</div>
+                <div><span class="font-semibold text-slate-700">Хронические:</span> {{ emergency_info.chronic_diseases or emergency_info.diagnoses or "Нет данных" }}</div>
+                <div><span class="font-semibold text-slate-700">Постоянные препараты:</span> {{ emergency_info.permanent_medications or "Нет данных" }}</div>
+                {% if selected_patient.notes %}
+                  <div><span class="font-semibold text-slate-700">Заметки:</span> {{ selected_patient.notes }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% if not selected_patient_can_edit %}
+            <div class="mt-4 inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-900">
+              Режим члена семьи: доступ только к назначенным пациентам
+            </div>
+          {% endif %}
+        {% endif %}
+      {% else %}
+        <p class="mt-2 text-sm text-slate-700">Сначала добавьте первого пациента.</p>
+      {% endif %}
+    </div>
+
+    <div class="space-y-4 p-5">
+      {% if request.headers.get("hx-request") == "true" and message %}
+        <div class="rounded-2xl border px-4 py-3 text-sm {% if is_error %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-700{% endif %}">
+          {{ message }}
+        </div>
+      {% endif %}
+    </div>
+  </article>
+
+  <article class="rounded-[2rem] bg-white p-5 shadow-sm ring-1 ring-slate-200">
+    <h3 class="text-lg font-semibold text-slate-900">Управление</h3>
+      <a href="/manage{% if selected_patient %}?selected_patient_id={{ selected_patient.id }}{% endif %}" class="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+        Открыть управление данными
+      </a>
+      {% if selected_patient %}
+      <a href="/simple?selected_patient_id={{ selected_patient.id }}" class="mt-3 inline-flex w-full items-center justify-center rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-600">
+        Простой режим
+      </a>
+    {% endif %}
+    {% if selected_patient %}
+      <a href="/patient/emergency?selected_patient_id={{ selected_patient.id }}" class="mt-3 inline-flex w-full items-center justify-center rounded-2xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white hover:bg-rose-500">
+        Экстренная информация
+      </a>
+    {% endif %}
+    {% if user.role == "owner" %}
+      <a href="/family/users" class="mt-3 inline-flex w-full items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+        Члены семьи
+      </a>
+    {% endif %}
+  </article>
+</div>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ title or "Домашняя медкарта" }}</title>
+    <meta name="csrf-token" content="{{ csrf_token(request) }}" />
+    <link rel="stylesheet" href="/static/tailwind.css" />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/vendor/chart.umd.js"></script>
+    <script src="/static/vendor/chartjs-plugin-zoom.min.js"></script>
+    <script src="/static/vendor/htmx.min.js"></script>
+    <script defer src="/static/vendor/alpine.min.js"></script>
+    <script defer src="/static/app.js"></script>
+  </head>
+  <body>
+    <div id="sync-status-banner" class="sticky top-0 z-50 hidden border-b border-slate-200 bg-white/95 px-4 py-3 text-sm font-medium text-slate-700 backdrop-blur">
+      <div class="mx-auto flex max-w-5xl items-center justify-between gap-3">
+        <div id="sync-status-text">Синхронизировано</div>
+        <div id="sync-status-count" class="hidden rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600"></div>
+      </div>
+    </div>
+    {% block body %}{% endblock %}
+  </body>
+</html>

@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page">
+    <section class="hero">
+      <div class="hero-header">
+        <div>
+          <h1>Журнал комментариев</h1>
+          <p class="muted">Общий список семейных заметок по всем доступным пациентам.</p>
+        </div>
+        <div class="inline">
+          <a class="btn-secondary btn-link" href="/comments/export?q={{ query }}&category={{ selected_category }}&author_email={{ selected_author_email }}&patient_id={{ selected_patient_id }}&pinned_only={{ 1 if pinned_only else 0 }}">Экспорт JSON</a>
+          <a class="btn-secondary btn-link" href="/comments/pdf?q={{ query }}&category={{ selected_category }}&author_email={{ selected_author_email }}&patient_id={{ selected_patient_id }}&pinned_only={{ 1 if pinned_only else 0 }}">Экспорт PDF</a>
+          <a class="btn-secondary btn-link" href="/comments/print?q={{ query }}&category={{ selected_category }}&author_email={{ selected_author_email }}&patient_id={{ selected_patient_id }}&pinned_only={{ 1 if pinned_only else 0 }}&layout=compact">Печать: компактно</a>
+          <a class="btn-secondary btn-link" href="/comments/print?q={{ query }}&category={{ selected_category }}&author_email={{ selected_author_email }}&patient_id={{ selected_patient_id }}&pinned_only={{ 1 if pinned_only else 0 }}&layout=doctor">Печать: к врачу</a>
+          <a class="btn-secondary btn-link" href="/comments/print?q={{ query }}&category={{ selected_category }}&author_email={{ selected_author_email }}&patient_id={{ selected_patient_id }}&pinned_only={{ 1 if pinned_only else 0 }}&layout=home">Печать: домой</a>
+          <a class="btn-secondary btn-link" href="/account">Аккаунт</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <form method="get" action="/comments" class="stack filters-form">
+        <div class="form-grid-2">
+          <div class="field">
+            <label for="q">Поиск</label>
+            <input id="q" name="q" value="{{ query }}" placeholder="Текст заметки или логин" />
+          </div>
+          <div class="field">
+            <label for="category">Категория</label>
+            <select id="category" name="category">
+              <option value="" {% if not selected_category %}selected{% endif %}>Все категории</option>
+              <option value="note" {% if selected_category == "note" %}selected{% endif %}>Обычная заметка</option>
+              <option value="clinical_alert" {% if selected_category == "clinical_alert" %}selected{% endif %}>Важная заметка</option>
+              <option value="reminder" {% if selected_category == "reminder" %}selected{% endif %}>Напоминание</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="field">
+            <label for="author_email">Автор</label>
+            <input id="author_email" name="author_email" value="{{ selected_author_email }}" placeholder="family_login" />
+          </div>
+          <div class="field">
+            <label for="patient_id">Пациент</label>
+            <select id="patient_id" name="patient_id">
+              <option value="" {% if not selected_patient_id %}selected{% endif %}>Все пациенты</option>
+              {% for patient in patients %}
+                <option value="{{ patient.id }}" {% if selected_patient_id == patient.id %}selected{% endif %}>{{ patient.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <label><input type="checkbox" name="pinned_only" value="1" {% if pinned_only %}checked{% endif %} /> только закреплённые</label>
+        <div class="inline">
+          <button type="submit" class="btn-secondary">Применить</button>
+          <a class="btn-link muted-link" href="/comments">Сбросить</a>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="list">
+        {% for item in entries %}
+          <div class="list-item">
+            <div><strong>{{ item.patient_name }}</strong> <a class="btn-link muted-link" href="/?selected_patient_id={{ item.patient_id }}">открыть карту</a></div>
+            <div class="small">{{ item.author_email }} • {{ item.category }}{% if item.pinned %} • закреплено{% endif %}</div>
+            <div>{{ item.text }}</div>
+            <div class="small muted">{{ item.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+          </div>
+        {% else %}
+          <p class="muted">Подходящих комментариев пока нет.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+{% endblock %}

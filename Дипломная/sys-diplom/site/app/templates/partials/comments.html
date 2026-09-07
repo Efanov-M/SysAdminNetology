@@ -1,0 +1,100 @@
+<article id="comments-block" class="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-200">
+  <div class="border-b border-slate-200 p-5">
+    <h2 class="text-xl font-semibold text-slate-900">Комментарии семьи</h2>
+    <p class="mt-1 text-sm text-slate-500">Короткие заметки для родственников и владельца карты по выбранному пациенту.</p>
+  </div>
+  {% if selected_patient_can_comment %}
+    <form
+      method="post"
+      action="/patients/{{ selected_patient.id }}/comments"
+      hx-post="/patients/{{ selected_patient.id }}/comments"
+      hx-target="#comments-block"
+      hx-swap="outerHTML"
+      hx-disabled-elt="button[type='submit']"
+      data-live-form="true"
+      data-success-state="{% if request.headers.get('hx-request') == 'true' and message and not is_error %}true{% else %}false{% endif %}"
+      data-error-state="{% if request.headers.get('hx-request') == 'true' and message and is_error %}true{% else %}false{% endif %}"
+      class="grid gap-3 bg-slate-50 p-5"
+    >
+      <div class="form-grid-2">
+        <select name="category" class="w-full rounded-2xl border-slate-300 bg-white">
+          <option value="note">Обычная заметка</option>
+          <option value="clinical_alert">Важная заметка</option>
+          <option value="reminder">Напоминание семье</option>
+        </select>
+        {% if selected_patient_can_edit %}
+          <label class="text-sm text-slate-600"><input type="checkbox" name="pinned" /> закрепить как важную</label>
+        {% endif %}
+      </div>
+      <div>
+        <input name="text" placeholder="Например, следить за вечерним давлением" required class="w-full rounded-2xl border-slate-300 bg-white {% if form_errors.get('text') %}border-rose-300 bg-rose-50{% endif %}" />
+        {% if form_errors.get("text") %}
+          <div class="mt-2 text-xs font-semibold text-rose-700">{{ form_errors.get("text") }}</div>
+        {% endif %}
+      </div>
+      <button type="submit" class="js-live-submit rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70">
+        <span class="js-live-idle">Добавить комментарий</span>
+        <span class="js-live-loading hidden items-center justify-center gap-2 text-sm font-medium">
+          <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"></span>
+          Сохраняем...
+        </span>
+        <span class="js-live-success hidden">Сохранено</span>
+        <span class="js-live-error hidden">Проверьте поля</span>
+      </button>
+      <div class="js-live-status min-h-[1.25rem] text-center text-xs font-semibold text-slate-500"></div>
+    </form>
+  {% else %}
+    <p class="p-5 text-sm text-slate-500">Комментарии доступны владельцу карты и родственникам с ролью «просмотр + комментарии».</p>
+  {% endif %}
+  {% if request.headers.get("hx-request") == "true" and message %}
+    <div class="mx-5 mt-4 rounded-2xl border px-4 py-3 text-sm {% if is_error %}border-rose-200 bg-rose-50 text-rose-700{% else %}border-emerald-200 bg-emerald-50 text-emerald-700{% endif %}">
+      {{ message }}
+    </div>
+  {% endif %}
+  <div class="space-y-3 p-5">
+    {% for comment in patient_comments %}
+      <div class="rounded-2xl border border-slate-200 p-4">
+        <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <div class="text-sm font-medium text-slate-900">{{ comment.author.account_name }}</div>
+            <div class="mt-1 flex flex-wrap gap-2">
+              <span class="rounded-full bg-slate-100 px-2 py-1 text-xs text-slate-600">{{ comment.category }}</span>
+              {% if comment.pinned %}
+                <span class="rounded-full bg-amber-100 px-2 py-1 text-xs text-amber-700">Закреплено</span>
+              {% endif %}
+            </div>
+            <div class="mt-1 text-sm text-slate-700">{{ comment.text }}</div>
+            <div class="mt-2 text-xs text-slate-500">{{ comment.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            {% if selected_patient_can_edit %}
+              <form
+                method="post"
+                action="/patients/{{ selected_patient.id }}/comments/{{ comment.id }}/pin"
+                hx-post="/patients/{{ selected_patient.id }}/comments/{{ comment.id }}/pin"
+                hx-target="#comments-block"
+                hx-swap="outerHTML"
+              >
+                <input type="hidden" name="pinned" value="{% if comment.pinned %}off{% else %}on{% endif %}" />
+                <button type="submit" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">{% if comment.pinned %}Открепить{% else %}Закрепить{% endif %}</button>
+              </form>
+            {% endif %}
+            {% if selected_patient_can_edit or comment.user_id == user.id %}
+              <form
+                method="post"
+                action="/patients/{{ selected_patient.id }}/comments/{{ comment.id }}/delete"
+                hx-post="/patients/{{ selected_patient.id }}/comments/{{ comment.id }}/delete"
+                hx-target="#comments-block"
+                hx-swap="outerHTML"
+              >
+                <button type="submit" class="rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">Удалить</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <p class="text-sm text-slate-500">Комментариев пока нет.</p>
+    {% endfor %}
+  </div>
+</article>

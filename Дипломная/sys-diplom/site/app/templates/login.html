@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="auth-wrap">
+    <section class="auth-card">
+      <h1>Домашняя медкарта</h1>
+      <p class="muted">Простой семейный кабинет: давление, назначения, документы.</p>
+      {% if error %}
+        <div class="banner error">{{ error }}</div>
+      {% endif %}
+      {% if request.query_params.get("registered") %}
+        <div class="banner">Регистрация прошла успешно. Теперь войдите.</div>
+      {% endif %}
+      <form method="post" action="/login" class="stack">
+        <div class="field">
+          <label for="login">Логин</label>
+          <input id="login" name="login" type="text" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="password">Пароль</label>
+          <input id="password" name="password" type="password" required />
+        </div>
+        <button type="submit">Войти</button>
+      </form>
+      <p class="small">Нет аккаунта? <a href="/register">Создать</a></p>
+    </section>
+  </main>
+{% endblock %}

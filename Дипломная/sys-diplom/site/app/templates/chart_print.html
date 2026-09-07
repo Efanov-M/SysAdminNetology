@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page print-page">
+    <section class="hero print-hide">
+      <div class="hero-header">
+        <div>
+          <h1>График для печати</h1>
+          <p class="muted">{{ patient.name }}{% if chart_lab_test %} • {{ chart_lab_test }}{% endif %}</p>
+        </div>
+        <div class="inline">
+          <button type="button" onclick="window.print()">Печать</button>
+          <a class="btn-secondary btn-link" href="/">Назад</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="chart-box print-chart">
+        <canvas
+          id="observationChart"
+          data-patient-id="{{ patient.id }}"
+          data-chart-type="{{ chart_type }}"
+          data-chart-lab-test="{{ chart_lab_test }}"
+        ></canvas>
+      </div>
+    </section>
+  </main>
+{% endblock %}

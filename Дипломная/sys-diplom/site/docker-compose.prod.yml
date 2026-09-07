@@ -1,0 +1,16 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+
+    env_file:
+      - .env.production
+
+    ports:
+      - "127.0.0.1:8000:8000"
+
+    volumes:
+      - uploads_data:/app/uploads
+
+volumes:
+  uploads_data:

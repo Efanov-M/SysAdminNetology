@@ -1,0 +1,73 @@
+<article class="overflow-hidden rounded-[2rem] bg-white shadow-sm ring-1 ring-slate-200">
+  <div class="border-b border-slate-200 p-5 sm:p-6">
+    <p class="text-xs uppercase tracking-[0.32em] text-rose-500">Экстренно важно</p>
+    <h2 class="mt-2 text-3xl font-semibold text-slate-900">Экстренная информация</h2>
+    <p class="mt-2 text-sm text-slate-500">Только самые важные данные: аллергии, хронические заболевания, постоянные препараты и контакты.</p>
+  </div>
+
+  {% if selected_patient %}
+    <div class="space-y-4 p-5 sm:p-6">
+      <div class="grid gap-4">
+        <section class="rounded-[1.5rem] bg-rose-50 p-4 ring-1 ring-rose-100">
+          <div class="text-xs uppercase tracking-[0.24em] text-rose-500">Группа крови</div>
+          <div class="mt-2 text-2xl font-semibold text-slate-900">{{ emergency_info.blood_type if emergency_info and emergency_info.blood_type else "Не указана" }}</div>
+        </section>
+
+        <section class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+          <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Аллергии</div>
+          <div class="mt-2 whitespace-pre-wrap break-words text-lg leading-8 text-slate-900">{{ emergency_info.allergies if emergency_info and emergency_info.allergies else "Нет данных" }}</div>
+        </section>
+
+        <section class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+          <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Хронические заболевания</div>
+          <div class="mt-2 whitespace-pre-wrap break-words text-lg leading-8 text-slate-900">{{ emergency_info.chronic_diseases if emergency_info and emergency_info.chronic_diseases else emergency_info.diagnoses if emergency_info and emergency_info.diagnoses else "Нет данных" }}</div>
+        </section>
+
+        <section class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+          <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Постоянные препараты</div>
+          <div class="mt-2 whitespace-pre-wrap break-words text-lg leading-8 text-slate-900">{{ emergency_info.permanent_medications if emergency_info and emergency_info.permanent_medications else "Нет данных" }}</div>
+        </section>
+
+        <section class="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+          <div class="text-xs uppercase tracking-[0.24em] text-slate-500">Контакты для экстренной связи</div>
+          <div class="mt-2 whitespace-pre-wrap break-words text-lg leading-8 text-slate-900">{{ emergency_info.emergency_contacts if emergency_info and emergency_info.emergency_contacts else "Нет данных" }}</div>
+        </section>
+      </div>
+
+      <div class="grid gap-2 sm:grid-cols-3">
+        <a href="/patients/{{ selected_patient.id }}/print?layout=ambulance" class="inline-flex items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">Печать для скорой</a>
+        <a href="/patients/{{ selected_patient.id }}/print?layout=admission" class="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700">Приёмное отделение</a>
+        <a href="/patients/{{ selected_patient.id }}/print?layout=relative" class="inline-flex items-center justify-center rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700">Для родственника</a>
+      </div>
+
+      {% if selected_patient_can_edit %}
+        <form method="post" action="/patients/{{ selected_patient.id }}/emergency-info" class="space-y-4 rounded-[1.75rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+          <h3 class="text-xl font-semibold text-slate-900">Обновить экстренные данные</h3>
+          <label class="block">
+            <span class="mb-2 block text-sm font-semibold text-slate-700">Группа крови</span>
+            <input name="blood_type" value="{{ emergency_info.blood_type if emergency_info else '' }}" placeholder="Например, A(II) Rh+" class="w-full rounded-2xl border-slate-300 bg-white p-4 text-base" />
+          </label>
+          <label class="block">
+            <span class="mb-2 block text-sm font-semibold text-slate-700">Аллергии</span>
+            <textarea name="allergies" placeholder="Например, пенициллин, йод" class="min-h-24 w-full rounded-2xl border-slate-300 bg-white p-4 text-base">{{ emergency_info.allergies if emergency_info else '' }}</textarea>
+          </label>
+          <label class="block">
+            <span class="mb-2 block text-sm font-semibold text-slate-700">Хронические заболевания</span>
+            <textarea name="diagnoses" placeholder="Например, гипертония, диабет" class="min-h-24 w-full rounded-2xl border-slate-300 bg-white p-4 text-base">{{ emergency_info.chronic_diseases if emergency_info else '' }}</textarea>
+          </label>
+          <label class="block">
+            <span class="mb-2 block text-sm font-semibold text-slate-700">Постоянные препараты</span>
+            <textarea name="permanent_medications" placeholder="Что пациент принимает постоянно" class="min-h-24 w-full rounded-2xl border-slate-300 bg-white p-4 text-base">{{ emergency_info.permanent_medications if emergency_info else '' }}</textarea>
+          </label>
+          <label class="block">
+            <span class="mb-2 block text-sm font-semibold text-slate-700">Контакты для экстренной связи</span>
+            <textarea name="emergency_contacts" placeholder="Телефоны родственников и врача" class="min-h-24 w-full rounded-2xl border-slate-300 bg-white p-4 text-base">{{ emergency_info.emergency_contacts if emergency_info else '' }}</textarea>
+          </label>
+          <button type="submit" class="w-full rounded-2xl bg-rose-600 px-4 py-4 text-base font-semibold text-white hover:bg-rose-500">Сохранить экстренную информацию</button>
+        </form>
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="p-5 text-sm text-slate-500">Сначала выберите пациента.</div>
+  {% endif %}
+</article>

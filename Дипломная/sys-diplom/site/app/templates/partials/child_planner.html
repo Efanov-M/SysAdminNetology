@@ -1,0 +1,80 @@
+<article class="space-y-4">
+  <section class="rounded-[1.75rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+    <p class="text-xs uppercase tracking-[0.3em] text-slate-500">План ребёнка</p>
+    <h2 class="mt-2 text-2xl font-semibold text-slate-900">Напоминания и ближайшие действия</h2>
+    <p class="mt-2 text-sm leading-6 text-slate-600">
+      Здесь собраны прививки по плану, детские напоминания и ближайшие действия по уходу.
+    </p>
+  </section>
+
+  <section class="grid gap-4 xl:grid-cols-2">
+    <article class="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-xs uppercase tracking-[0.26em] text-slate-500">Ближайшее</p>
+          <h3 class="mt-2 text-xl font-semibold text-slate-900">Что скоро сделать</h3>
+        </div>
+      </div>
+
+      <div class="mt-4 space-y-3">
+        {% if child_next_vaccine %}
+          <div class="rounded-[1.25rem] bg-emerald-50 px-4 py-3 ring-1 ring-emerald-100">
+            <div class="text-sm font-semibold text-emerald-950">Следующая прививка</div>
+            <div class="mt-1 text-sm text-emerald-900">
+              {{ child_next_vaccine.name }} — {{ child_next_vaccine.date.strftime("%d.%m.%Y") if child_next_vaccine.date else "дата не указана" }}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if child_next_medication_reminder %}
+          <div class="rounded-[1.25rem] bg-amber-50 px-4 py-3 ring-1 ring-amber-100">
+            <div class="text-sm font-semibold text-amber-950">Следующий приём лекарства</div>
+            <div class="mt-1 text-sm text-amber-900">
+              {{ child_next_medication_reminder.title }} — {{ child_next_medication_reminder.time_of_day.strftime("%H:%M") }}
+            </div>
+          </div>
+        {% endif %}
+
+        {% if not child_next_vaccine and not child_next_medication_reminder %}
+          <div class="rounded-[1.25rem] bg-slate-50 px-4 py-4 text-sm leading-6 text-slate-500 ring-1 ring-slate-200">
+            На ближайшее время действий по плану нет.
+          </div>
+        {% endif %}
+      </div>
+    </article>
+
+    <article class="rounded-[1.75rem] bg-white p-4 shadow-sm ring-1 ring-slate-200">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-xs uppercase tracking-[0.26em] text-slate-500">Напоминания</p>
+          <h3 class="mt-2 text-xl font-semibold text-slate-900">Активные напоминания</h3>
+        </div>
+      </div>
+
+      {% if selected_patient_can_edit %}
+        <form method="post" action="/patients/{{ selected_patient.id }}/reminders" class="mt-4 grid gap-3 rounded-[1.25rem] bg-slate-50 p-4 ring-1 ring-slate-200">
+          <input name="title" required placeholder="Например, сироп или прививка" class="w-full rounded-2xl border-slate-300 bg-white" />
+          <select name="reminder_type" class="w-full rounded-2xl border-slate-300 bg-white">
+            <option value="child_medication">Лекарство</option>
+            <option value="vaccine">Прививка</option>
+            <option value="doctor_visit">Визит к врачу</option>
+          </select>
+          <input type="time" name="time_of_day" required class="w-full rounded-2xl border-slate-300 bg-white" />
+          <input type="hidden" name="return_to" value="planner" />
+          <button type="submit" class="w-full rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white">Сохранить напоминание</button>
+        </form>
+      {% endif %}
+
+      <div class="mt-4 space-y-2">
+        {% for reminder in patient_reminders %}
+          <div class="rounded-[1.25rem] bg-slate-50 px-4 py-3 ring-1 ring-slate-200">
+            <div class="font-semibold text-slate-900">{{ reminder.title }}</div>
+            <div class="text-sm text-slate-600">{{ reminder.time_of_day.strftime("%H:%M") }} • {{ reminder.reminder_type }}</div>
+          </div>
+        {% else %}
+          <p class="text-sm text-slate-500">Напоминаний пока нет.</p>
+        {% endfor %}
+      </div>
+    </article>
+  </section>
+</article>

@@ -1,0 +1,22 @@
+{% macro page_header(eyebrow, title, description="", show_home=False, home_href="/", back_fallback="/") -%}
+  <section class="mb-6 overflow-hidden rounded-[2rem] bg-gradient-to-r from-teal-700 via-cyan-700 to-sky-700 px-6 py-6 text-white shadow-lg ring-1 ring-cyan-800/20">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div class="max-w-3xl">
+        {% if eyebrow %}
+          <p class="text-xs uppercase tracking-[0.35em] text-cyan-100">{{ eyebrow }}</p>
+        {% endif %}
+        <h1 class="mt-2 text-3xl font-semibold">{{ title }}</h1>
+        {% if description %}
+          <p class="mt-2 max-w-2xl text-sm leading-6 text-cyan-50">{{ description }}</p>
+        {% endif %}
+      </div>
+      <div class="flex flex-wrap gap-2 text-sm">
+        <button type="button" onclick="window.history.length > 1 ? window.history.back() : window.location.assign('{{ back_fallback }}')" class="rounded-full bg-white/15 px-4 py-2 font-medium text-white transition hover:bg-white/25">← Назад</button>
+        {% if show_home %}
+          <a class="rounded-full bg-white px-4 py-2 font-medium text-teal-800 transition hover:bg-cyan-50" href="{{ home_href }}">Домой</a>
+        {% endif %}
+        {{ caller() if caller else "" }}
+      </div>
+    </div>
+  </section>
+{%- endmacro %}

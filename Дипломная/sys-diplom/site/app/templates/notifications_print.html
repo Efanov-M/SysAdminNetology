@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page">
+    <section class="hero">
+      <div class="hero-header">
+        <div>
+          <h1>История уведомлений для печати</h1>
+          <p class="muted">
+            {% if layout == "doctor" %}
+              Версия для врача с акцентом на важные события доставки.
+            {% elif layout == "home" %}
+              Домашняя бумажная версия истории уведомлений.
+            {% else %}
+              Компактная printable-версия для семьи или врача.
+            {% endif %}
+          </p>
+        </div>
+        <a class="btn-secondary btn-link" href="/account">Назад</a>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="list">
+        {% for item in entries %}
+          <div class="list-item">
+            <div><strong>{{ item.action_label }}</strong></div>
+            <div class="small">{{ item.created_at.strftime("%d.%m.%Y %H:%M") }}</div>
+            <div class="small">Статус: {{ item.status }}</div>
+            {% if layout == "doctor" %}
+              <div class="small muted">{{ item.details }}</div>
+            {% elif layout == "home" %}
+              <div class="small muted">История отправки семейных напоминаний и тестов.</div>
+            {% elif layout == "emergency" %}
+              <div class="small muted">Короткий лист на случай экстренной ситуации.</div>
+            {% elif layout == "trip" %}
+              <div class="small muted">История уведомлений, которую можно взять в дорогу.</div>
+            {% endif %}
+          </div>
+        {% else %}
+          <p class="muted">Уведомлений для печати пока нет.</p>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block body %}
+  <main class="page">
+    <section class="hero">
+      <div class="hero-header">
+        <div>
+          <h1>{{ packet_info.title }}</h1>
+          <p class="muted">{{ packet_info.subtitle }}</p>
+        </div>
+        <a class="btn-secondary btn-link" href="/family/print">Назад</a>
+      </div>
+    </section>
+
+    {% for item in payload.patients %}
+      <section class="card stack">
+        <div>
+          <h2>{{ item.patient.name }}</h2>
+          <div class="small muted">
+            {% if item.patient.date_of_birth %}Дата рождения: {{ item.patient.date_of_birth }}{% endif %}
+          </div>
+        </div>
+
+        {% if packet == "emergency" %}
+          <div><strong>Экстренно важно:</strong> последние лекарства {{ item.medications|length }}, документы {{ item.documents|length }}, заметки: {{ item.patient.notes or "нет" }}</div>
+        {% elif packet == "hospital" %}
+          <div><strong>Для стационара:</strong> лекарства {{ item.medications|length }}, показатели {{ item.observations|length }}, анализы {{ item.lab_results|length }}, документы {{ item.documents|length }}</div>
+        {% elif packet == "homecare" %}
+          <div><strong>Для ухода дома:</strong> регулярных лекарств {{ item.medications|length }}, домашних заметок и наблюдений {{ item.observations|length + item.lab_results|length }}</div>
+        {% elif packet == "discharge" %}
+          <div><strong>После выписки:</strong> текущих лекарств {{ item.medications|length }}, документов {{ item.documents|length }}, контрольных анализов {{ item.lab_results|length }}</div>
+        {% elif packet == "kid_trip" %}
+          <div><strong>Для поездки с ребёнком:</strong> лекарства {{ item.medications|length }}, заметки {{ item.patient.notes or "нет" }}</div>
+        {% elif packet == "monthly" %}
+          <div><strong>Контроль на месяц:</strong> регулярных лекарств {{ item.medications|length }}, анализов {{ item.lab_results|length }}, показателей {{ item.observations|length }}</div>
+        {% elif packet == "caregiver" %}
+          <div><strong>Для сиделки:</strong> лекарства {{ item.medications|length }}, ключевые заметки {{ item.patient.notes or "нет" }}, домашних наблюдений {{ item.observations|length }}</div>
+        {% elif packet == "postop_month" %}
+          <div><strong>После операции:</strong> лекарства {{ item.medications|length }}, контрольных документов {{ item.documents|length }}, показателей {{ item.observations|length }}</div>
+        {% elif packet == "elder_meds" %}
+          <div><strong>Для взрослого родственника:</strong> регулярных лекарств {{ item.medications|length }}, анализов {{ item.lab_results|length }}, заметки {{ item.patient.notes or "нет" }}</div>
+        {% elif packet == "kid_home" %}
+          <div><strong>Для ребёнка дома:</strong> лекарства {{ item.medications|length }}, документы {{ item.documents|length }}, заметки {{ item.patient.notes or "нет" }}</div>
+        {% elif packet == "night_shift" %}
+          <div><strong>Для ночной смены:</strong> регулярных лекарств {{ item.medications|length }}, ночных наблюдений {{ item.observations|length }}, быстрых ориентиров {{ item.documents|length }}</div>
+        {% elif packet == "weekly_control" %}
+          <div><strong>Недельный контроль:</strong> домашних показателей {{ item.observations|length }}, анализов {{ item.lab_results|length }}, регулярных лекарств {{ item.medications|length }}</div>
+        {% elif packet == "social_worker" %}
+          <div><strong>Для соцработника:</strong> лекарств {{ item.medications|length }}, документов {{ item.documents|length }}, кратких бытовых заметок {{ item.patient.notes or "нет" }}</div>
+        {% elif packet == "guardian_full" %}
+          <div><strong>Для опекуна:</strong> лекарства {{ item.medications|length }}, показатели {{ item.observations|length }}, анализы {{ item.lab_results|length }}, документы {{ item.documents|length }}</div>
+        {% elif packet == "weekend_duty" %}
+          <div><strong>Для выходного дежурства:</strong> лекарств {{ item.medications|length }}, быстрых наблюдений {{ item.observations|length }}, заметки {{ item.patient.notes or "нет" }}</div>
+        {% elif packet == "clinic_doctor" %}
+          <div><strong>Для врача поликлиники:</strong> лекарства {{ item.medications|length }}, анализы {{ item.lab_results|length }}, документы {{ item.documents|length }}</div>
+        {% elif packet == "homecare_2weeks" %}
+          <div><strong>На 2 недели ухода:</strong> лекарства {{ item.medications|length }}, показатели {{ item.observations|length }}, документы {{ item.documents|length }}</div>
+        {% elif packet == "morning_duty" %}
+          <div><strong>Для утренней смены:</strong> лекарства {{ item.medications|length }}, показатели {{ item.observations|length }}, быстрые задачи {{ item.patient.notes or "нет" }}</div>
+        {% elif packet == "evening_duty" %}
+          <div><strong>Для вечерней смены:</strong> лекарства {{ item.medications|length }}, домашние наблюдения {{ item.observations|length }}, подготовка к ночи {{ item.patient.notes or "нет" }}</div>
+        {% elif packet == "helper_card" %}
+          <div><strong>Для помощника:</strong> кто пациент, что важно проверить сегодня и какие документы лежат под рукой.</div>
+        {% elif packet == "weekly_board" %}
+          <div><strong>На неделю:</strong> лекарства {{ item.medications|length }}, показатели {{ item.observations|length }}, анализы {{ item.lab_results|length }}</div>
+        {% elif packet == "weekday_shift" %}
+          <div><strong>Для будней:</strong> ключевые лекарства {{ item.medications|length }}, ежедневные показатели {{ item.observations|length }}, документы {{ item.documents|length }}</div>
+        {% elif packet == "weekend_shift" %}
+          <div><strong>Для выходных:</strong> лекарства {{ item.medications|length }}, семейные заметки {{ item.patient.notes or "нет" }}, документы {{ item.documents|length }}</div>
+        {% elif packet == "social_route" %}
+          <div><strong>Для соцслужб:</strong> контакты, лекарства {{ item.medications|length }} и бытовые ориентиры по уходу.</div>
+        {% elif packet == "child_school_trip" %}
+          <div><strong>Для школы и поездки:</strong> контакты, аллергии и короткий список важных лекарств.</div>
+        {% elif packet == "shift_handover" %}
+          <div><strong>Для передачи смены:</strong> что сделано, что осталось, какие лекарства {{ item.medications|length }} и какие тревожные признаки важно не пропустить.</div>
+        {% elif packet == "respiratory_route" %}
+          <div><strong>Для дыхательного маршрута:</strong> лекарства {{ item.medications|length }}, документы {{ item.documents|length }}, бытовые заметки по кислороду и уходу {{ item.patient.notes or "нет" }}</div>
+        {% elif packet == "palliative_daily" %}
+          <div><strong>Для паллиативного ухода дома:</strong> лекарства {{ item.medications|length }}, показатели {{ item.observations|length }}, семейные заметки {{ item.patient.notes or "нет" }}</div>
+        {% elif packet == "sedation_watch" %}
+          <div><strong>Для длительной седации:</strong> лекарства {{ item.medications|length }}, показатели {{ item.observations|length }}, документы {{ item.documents|length }}, ключевые бытовые заметки {{ item.patient.notes or "нет" }}</div>
+        {% elif packet == "airway_handover" %}
+          <div><strong>Для трахеостомы и дыхательной смены:</strong> лекарства {{ item.medications|length }}, документы {{ item.documents|length }}, ориентиры по уходу {{ item.patient.notes or "нет" }}</div>
+        {% else %}
+          <div><strong>Для реабилитации:</strong> история анализов {{ item.lab_results|length }}, регулярных лекарств {{ item.medications|length }}</div>
+        {% endif %}
+
+        <div class="list">
+          {% for medication in item.medications[:5] %}
+            <div class="list-item">
+              <strong>{{ medication.name }}</strong>
+              <div class="small">{{ medication.dosage or "дозировка не указана" }}{% if medication.schedule %} • {{ medication.schedule }}{% endif %}</div>
+            </div>
+          {% else %}
+            <p class="muted">Лекарства не указаны.</p>
+          {% endfor %}
+        </div>
+
+        {% if packet != "emergency" %}
+          <div class="list">
+            {% for result in item.lab_results[:5] %}
+              <div class="list-item">
+                <strong>{{ result.value.test_name }}</strong>
+                <div class="small">{{ result.value.value }} {{ result.value.unit or "" }}</div>
+              </div>
+            {% else %}
+              <p class="muted">Анализов пока нет.</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if packet in ["homecare", "monthly", "discharge", "caregiver", "postop_month", "elder_meds", "night_shift", "weekly_control", "guardian_full", "weekend_duty", "homecare_2weeks", "morning_duty", "evening_duty", "weekly_board", "shift_handover", "respiratory_route", "palliative_daily", "sedation_watch"] %}
+          <div class="list">
+            {% for observation in item.observations[:5] %}
+              <div class="list-item">
+                <strong>{{ observation.type }}</strong>
+                <div class="small">{{ observation.value }}</div>
+              </div>
+            {% else %}
+              <p class="muted">Домашних показателей пока нет.</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        {% if packet in ["social_worker", "guardian_full", "night_shift", "clinic_doctor", "homecare_2weeks", "helper_card", "shift_handover", "respiratory_route", "airway_handover", "sedation_watch"] %}
+          <div class="list">
+            {% for document in item.documents[:5] %}
+              <div class="list-item">
+                <strong>{{ document.original_filename or document.file_path }}</strong>
+                <div class="small">{{ document.description or "медицинский документ" }}</div>
+              </div>
+            {% else %}
+              <p class="muted">Документов пока нет.</p>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </section>
+    {% else %}
+      <section class="card"><p class="muted">Пока нет пациентов для печати.</p></section>
+    {% endfor %}
+  </main>
+{% endblock %}
