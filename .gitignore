@@ -18,3 +18,4 @@ crash.*.log
 *.pfx
 .env
 .env.*
+Дипломная/sys-diplom/ansible/*.deb
