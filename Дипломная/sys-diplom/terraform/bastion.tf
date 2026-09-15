@@ -1,6 +1,6 @@
 
 data "yandex_compute_image" "ubuntu" {
-  family = "ubuntu-2404-lts-oslogin"
+  image_id = "fd849rcpqs7mf5d38vg5"
 }
 resource "yandex_vpc_address" "bastion_public_ip" {
   external_ipv4_address {
@@ -9,10 +9,11 @@ resource "yandex_vpc_address" "bastion_public_ip" {
 }
 
 resource "yandex_compute_instance" "bastion" {
-  name        = "bastion"
-  hostname    = "bastion"
-  description = "Bastion host for diploma infrastructure"
-  zone        = "ru-central1-d"
+  name                      = "bastion"
+  allow_stopping_for_update = true
+  hostname                  = "bastion"
+  description               = "Bastion host for diploma infrastructure"
+  zone                      = "ru-central1-d"
 
   platform_id = "standard-v3"
 
@@ -24,7 +25,7 @@ resource "yandex_compute_instance" "bastion" {
 
 
   scheduling_policy {
-    preemptible = true
+    preemptible = false
   }
 
 

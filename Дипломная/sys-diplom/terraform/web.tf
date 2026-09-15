@@ -1,8 +1,9 @@
 resource "yandex_compute_instance" "web_01" {
-  name        = "web-01"
-  hostname    = "web-01"
-  description = "Private web server 01"
-  zone        = "ru-central1-d"
+  name                      = "web-01"
+  allow_stopping_for_update = true
+  hostname                  = "web-01"
+  description               = "Private web server 01"
+  zone                      = "ru-central1-d"
 
   platform_id = "standard-v3"
 
@@ -13,7 +14,7 @@ resource "yandex_compute_instance" "web_01" {
   }
 
   scheduling_policy {
-    preemptible = true
+    preemptible = false
   }
 
   boot_disk {
@@ -37,10 +38,11 @@ resource "yandex_compute_instance" "web_01" {
 }
 
 resource "yandex_compute_instance" "web_02" {
-  name        = "web-02"
-  hostname    = "web-02"
-  description = "Private web server 02"
-  zone        = "ru-central1-a"
+  name                      = "web-02"
+  allow_stopping_for_update = true
+  hostname                  = "web-02"
+  description               = "Private web server 02"
+  zone                      = "ru-central1-a"
 
   platform_id = "standard-v3"
 
@@ -51,7 +53,7 @@ resource "yandex_compute_instance" "web_02" {
   }
 
   scheduling_policy {
-    preemptible = true
+    preemptible = false
   }
 
   boot_disk {

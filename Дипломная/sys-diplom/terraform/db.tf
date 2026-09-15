@@ -1,8 +1,9 @@
 resource "yandex_compute_instance" "db_01" {
-  name        = "db-01"
-  hostname    = "db-01"
-  description = "PostgreSQL primary database server"
-  zone        = "ru-central1-d"
+  name                      = "db-01"
+  allow_stopping_for_update = true
+  hostname                  = "db-01"
+  description               = "PostgreSQL primary database server"
+  zone                      = "ru-central1-d"
 
   platform_id = "standard-v3"
 
@@ -13,7 +14,7 @@ resource "yandex_compute_instance" "db_01" {
   }
 
   scheduling_policy {
-    preemptible = true
+    preemptible = false
   }
 
   boot_disk {
@@ -37,10 +38,11 @@ resource "yandex_compute_instance" "db_01" {
 }
 
 resource "yandex_compute_instance" "db_02" {
-  name        = "db-02"
-  hostname    = "db-02"
-  description = "PostgreSQL standby database server"
-  zone        = "ru-central1-a"
+  name                      = "db-02"
+  allow_stopping_for_update = true
+  hostname                  = "db-02"
+  description               = "PostgreSQL standby database server"
+  zone                      = "ru-central1-a"
 
   platform_id = "standard-v3"
 
@@ -51,7 +53,7 @@ resource "yandex_compute_instance" "db_02" {
   }
 
   scheduling_policy {
-    preemptible = true
+    preemptible = false
   }
 
   boot_disk {

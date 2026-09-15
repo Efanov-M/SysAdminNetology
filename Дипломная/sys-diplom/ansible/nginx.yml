@@ -14,8 +14,41 @@
         name: nginx
         state: present
 
+    - name: Deploy reverse proxy configuration
+      ansible.builtin.template:
+        src: ../site/deploy/nginx.conf
+        dest: /etc/nginx/sites-available/phr
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload nginx
+
+    - name: Enable reverse proxy site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/phr
+        dest: /etc/nginx/sites-enabled/phr
+        state: link
+      notify: Reload nginx
+
+    - name: Disable default nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reload nginx
+
+    - name: Validate nginx configuration
+      ansible.builtin.command:
+        cmd: nginx -t
+      changed_when: false
+
     - name: Ensure nginx is enabled and running
       ansible.builtin.service:
         name: nginx
         state: started
         enabled: true
+
+  handlers:
+    - name: Reload nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded

@@ -20,6 +20,7 @@
         name: zabbix-agent2
         state: present
         update_cache: true
+
     - name: Configure Zabbix Agent 2 active checks
       ansible.builtin.copy:
         dest: /etc/zabbix/zabbix_agent2.d/diploma.conf
@@ -29,9 +30,16 @@
         content: |
           ServerActive=10.10.10.4
           Hostname={{ inventory_hostname }}
+      notify: Restart Zabbix Agent 2
 
-    - name: Enable and restart Zabbix Agent 2
+    - name: Ensure Zabbix Agent 2 is enabled and running
+      ansible.builtin.service:
+        name: zabbix-agent2
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Restart Zabbix Agent 2
       ansible.builtin.service:
         name: zabbix-agent2
         state: restarted
-        enabled: true

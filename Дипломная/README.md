@@ -1,7 +1,7 @@
 # Дипломная работа по профессии «Системный администратор»
-    
+
     Выполнил студент Ефанов Михаил Евгеньевич
-    
+
     ## Доступ к развёрнутой инфраструктуре
 
 На момент завершения дипломного проекта используются следующие публичные адреса:
@@ -69,7 +69,7 @@
 24. Этап 23 — Развёртывание собственного веб-приложения на отказоустойчивой инфраструктуре
 25. Этап 24 — Итоговая проверка соответствия требованиям дипломного проекта
 
-## Введение 
+## Введение
 
 
 В процессе выполнения дипломного проекта я старался фиксировать ход работы и сохранять материалы, которые могли пригодиться при подготовке итогового отчёта. Сохранялись ссылки на документацию и найденные решения, результаты выполнения команд в терминале, сообщения об ошибках, отдельные ответы нейросетевых инструментов, а также скриншоты различных этапов настройки и проверки инфраструктуры.
@@ -103,106 +103,106 @@
 
 **Исходное задание**
 
-- Дипломная работа Netology «Системный администратор»:  
+- Дипломная работа Netology «Системный администратор»:
   https://github.com/netology-code/sys-diplom/tree/diplom-zabbix
-- Рекомендации Netology по экономии облачных ресурсов:  
+- Рекомендации Netology по экономии облачных ресурсов:
   https://github.com/netology-code/devops-materials/blob/master/cloudwork.MD
 
 **Yandex Cloud**
 
-- Документация Yandex Cloud:  
+- Документация Yandex Cloud:
   https://yandex.cloud/ru/docs/
-- Terraform в Yandex Cloud:  
+- Terraform в Yandex Cloud:
   https://yandex.cloud/ru/docs/terraform/
-- Начало работы с Terraform в Yandex Cloud:  
+- Начало работы с Terraform в Yandex Cloud:
   https://yandex.cloud/ru/docs/terraform/quickstart
-- Application Load Balancer:  
+- Application Load Balancer:
   https://yandex.cloud/ru/docs/application-load-balancer/
-- Virtual Private Cloud:  
+- Virtual Private Cloud:
   https://yandex.cloud/ru/docs/vpc/
-- Security Groups:  
+- Security Groups:
   https://yandex.cloud/ru/docs/vpc/concepts/security-groups
-- NAT Gateway:  
+- NAT Gateway:
   https://yandex.cloud/ru/docs/vpc/operations/create-nat-gateway
-- Bastion Host:  
+- Bastion Host:
   https://yandex.cloud/ru/docs/tutorials/routing/bastion
-- Compute Cloud:  
+- Compute Cloud:
   https://yandex.cloud/ru/docs/compute/
-- Snapshots и резервное копирование дисков:  
+- Snapshots и резервное копирование дисков:
   https://yandex.cloud/ru/docs/compute/concepts/snapshot
 
 **Terraform**
 
-- Документация Terraform:  
+- Документация Terraform:
   https://developer.hashicorp.com/terraform/docs
-- Terraform Language:  
+- Terraform Language:
   https://developer.hashicorp.com/terraform/language
-- Terraform CLI:  
+- Terraform CLI:
   https://developer.hashicorp.com/terraform/cli
 
 **Ansible**
 
-- Документация Ansible:  
+- Документация Ansible:
   https://docs.ansible.com/ansible/latest/
-- Ansible Inventory:  
+- Ansible Inventory:
   https://docs.ansible.com/ansible/latest/inventory_guide/intro_inventory.html
-- Ansible Playbooks:  
+- Ansible Playbooks:
   https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_intro.html
 
 **Docker**
 
-- Документация Docker:  
+- Документация Docker:
   https://docs.docker.com/
-- Установка Docker Engine на Ubuntu:  
+- Установка Docker Engine на Ubuntu:
   https://docs.docker.com/engine/install/ubuntu/
-- Docker Compose:  
+- Docker Compose:
   https://docs.docker.com/compose/
 
 **nginx**
 
-- Документация nginx:  
+- Документация nginx:
   https://nginx.org/en/docs/
-- HTTP Proxy Module:  
+- HTTP Proxy Module:
   https://nginx.org/en/docs/http/ngx_http_proxy_module.html
 
 **Zabbix**
 
-- Документация Zabbix:  
+- Документация Zabbix:
   https://www.zabbix.com/documentation/current/en/manual
-- Zabbix Agent 2:  
+- Zabbix Agent 2:
   https://www.zabbix.com/documentation/current/en/manual/concepts/agent2
 
 **Elastic Stack**
 
-- Документация Elasticsearch:  
+- Документация Elasticsearch:
   https://www.elastic.co/docs
-- Elasticsearch:  
+- Elasticsearch:
   https://www.elastic.co/docs/reference/elasticsearch
-- Filebeat:  
+- Filebeat:
   https://www.elastic.co/docs/reference/beats/filebeat
-- Kibana:  
+- Kibana:
   https://www.elastic.co/docs/explore-analyze
 
 **PostgreSQL**
 
-- Документация PostgreSQL 16:  
+- Документация PostgreSQL 16:
   https://www.postgresql.org/docs/16/
-- High Availability:  
+- High Availability:
   https://www.postgresql.org/docs/16/high-availability.html
-- Warm Standby:  
+- Warm Standby:
   https://www.postgresql.org/docs/16/warm-standby.html
-- Failover:  
+- Failover:
   https://www.postgresql.org/docs/16/warm-standby-failover.html
-- pg_basebackup:  
+- pg_basebackup:
   https://www.postgresql.org/docs/16/app-pgbasebackup.html
 
 **FastAPI и Alembic**
 
-- Документация FastAPI:  
+- Документация FastAPI:
   https://fastapi.tiangolo.com/
-- Документация Alembic:  
+- Документация Alembic:
   https://alembic.sqlalchemy.org/en/latest/
-  
+
   ### Дополнительные статьи и материалы
 
 **Terraform и Yandex Cloud**
@@ -265,8 +265,8 @@
 
 ### Этап 1 - Подготовка
 
-    Выполнены проверка версий на моем хосте, так как данный хост не участвовал в обучении до этого, многое не установлено : 
-    
+    Выполнены проверка версий на моем хосте, так как данный хост не участвовал в обучении до этого, многое не установлено :
+
 ![Снимок экрана — 2026-09-02 в 15.15.25](assets/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%C2%A0%E2%80%94%202026-09-02%20%D0%B2%C2%A015.15.25.png)
 
     Выполняю установку :
@@ -287,8 +287,8 @@ pipx install --include-deps ansible
 curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
 ```
 
-    После установки : 
-```bash    
+    После установки :
+```bash
 source ~/.zshrc
 ```
 
@@ -298,7 +298,7 @@ source ~/.zshrc
 
 
 
-    Проверяем доступ к яндексу через терминал : 
+    Проверяем доступ к яндексу через терминал :
 ![Снимок экрана — 2026-09-02 в 15.29.54](assets/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%C2%A0%E2%80%94%202026-09-02%20%D0%B2%C2%A015.29.54.png)
 
 
@@ -315,10 +315,10 @@ source ~/.zshrc
        ├── cloud ✓
        ├── folder ✓
        └── доступ к Yandex Cloud API ✓
-       
-       
-       
-       
+
+
+
+
 ### Этап 2 — Настройка Terraform и безопасной авторизации в Yandex Cloud
 
 Для работы с Yandex Cloud через Terraform в каталоге `terraform` были созданы основные конфигурационные файлы:
@@ -6494,7 +6494,1300 @@ Yandex Cloud VPC
 
 Дополнительно реализована и практически проверена отказоустойчивость PostgreSQL с ручным переключением PRIMARY/STANDBY.
 
-На момент завершения основной работы обязательная архитектура дипломного проекта реализована. Перед окончательной сдачей остаётся перевести виртуальные машины из режима `preemptible` в постоянно работающий режим.
+
+# Работа над ошибками.
+
+## Замечания по результатам проверки дипломной работы
+
+### 1. Резервные `.bak`-файлы в репозитории
+
+В репозитории остались резервные копии рабочих файлов:
+
+```text
+bastion.tf.bak_before_cleanup_2026-09-06
+inventory.ini.bak_2026-09-06
+docker.yml.bak_before_kibana_2026-09-06
+filebeat.yml.bak_2026-09-06
+docker-compose.prod.yml.bak_before_diploma
+```
+
+Git уже хранит историю изменений файлов, поэтому отдельные резервные копии в рабочем репозитории не нужны. Со временем такие файлы затрудняют понимание того, какая конфигурация является актуальной.
+
+Необходимо удалить `.bak`-файлы из репозитория.
+
+### 2. Неидемпотентный перезапуск Zabbix Agent и Filebeat
+
+В `zabbix-agent.yml` и `filebeat.yml` последняя задача использует:
+
+```yaml
+state: restarted
+```
+
+Из-за этого при каждом запуске playbook сервис перезапускается независимо от того, изменялась его конфигурация или нет.
+
+Перезапуск необходимо вынести в `handlers` и вызывать через `notify` только от задачи, изменяющей конфигурационный файл.
+
+### 3. Использование `reload` вместо `restart` для nginx
+
+При автоматизации nginx для применения новой конфигурации необходимо использовать:
+
+```text
+reload
+```
+
+вместо:
+
+```text
+restart
+```
+
+`restart` прерывает существующие соединения. При `reload` старые соединения могут быть корректно завершены, а новые запросы уже обслуживаются с новой конфигурацией.
+
+### 4. Автоматизация конфигурации reverse proxy nginx
+
+Существующий `nginx.yml` только устанавливает пакет nginx.
+
+Конфигурация reverse proxy:
+
+```text
+site/deploy/nginx.conf
+```
+
+ранее переносилась на web-серверы вручную.
+
+Необходимо автоматизировать её развёртывание через Ansible с использованием `template` и handler для применения изменённой конфигурации nginx.
+
+### 5. Автоматизация настройки PostgreSQL и репликации
+
+PostgreSQL и streaming replication ранее настраивались вручную через SSH.
+
+Необходимо перенести эту настройку в отдельный Ansible playbook, чтобы после повторного создания серверов PostgreSQL не требовалось вручную повторять настройку базы данных и репликации.
+
+### 6. Автоматизация развёртывания приложения
+
+Приложение ранее копировалось на `web-01` и `web-02` вручную через Bastion Host.
+
+Необходимо создать отдельный Ansible playbook для развёртывания приложения на web-нодах.
+
+Цель доработки пунктов 4–6 — добиться того, чтобы после повторного создания инфраструктуры не приходилось вручную повторять этапы настройки nginx, PostgreSQL и приложения.
+
+### 7. Жёсткая привязка приложения к `db-02`
+
+Строка подключения приложения напрямую указывает на `db-02`.
+
+При выполненном failover адрес базы данных приходилось вручную изменять на обеих web-нодах и после этого перезапускать контейнеры.
+
+В качестве возможных решений предложено рассмотреть:
+
+- отдельное DNS-имя для подключения к PostgreSQL;
+- Keepalived/VIP;
+- HAProxy;
+- PgBouncer;
+- Patroni.
+
+Данное замечание является рекомендацией и не требуется к обязательной реализации в рамках доработки диплома.
+
+### 8. Elasticsearch и Kibana без аутентификации
+
+Elasticsearch развёрнут с:
+
+```text
+xpack.security.enabled=false
+```
+
+Kibana также используется без соответствующей авторизации.
+
+Для дипломной работы такая конфигурация допустима, поскольку доступ ограничивается Security Groups и сервисы находятся внутри инфраструктуры.
+
+Для production-среды такой вариант использовать не следует: пользователь, получивший доступ во внутреннюю сеть, потенциально сможет получить доступ к логам или изменить данные Elasticsearch.
+
+Данное замечание является рекомендацией для production-среды.
+
+### 9. Отсутствие TLS на Application Load Balancer
+
+Application Load Balancer в текущей конфигурации работает по HTTP без TLS.
+
+Для реального production-проекта необходимо использовать HTTPS и сертификат.
+
+Для текущей дипломной работы это не является обязательным исправлением.
+
+### 10. Закомментированное правило `0.0.0.0/0` в Bastion Security Group
+
+В `bastion_sg` осталась закомментированная строка:
+
+```hcl
+#v4_cidr_blocks = ["0.0.0.0/0"]
+```
+
+Её необходимо удалить, чтобы исключить возможность случайного открытия SSH-доступа к Bastion Host из всего интернета.
+
+### 11. Отключение `preemptible` перед сдачей
+
+При разработке инфраструктуры использовались прерываемые виртуальные машины:
+
+```hcl
+preemptible = true
+```
+
+Перед окончательной сдачей дипломной работы необходимо перевести виртуальные машины в постоянно работающий режим:
+
+```hcl
+preemptible = false
+```
 
 
+## Этап 25 — Исправления по результатам проверки: очистка репозитория и стабилизация Terraform
 
+После первой проверки дипломной работы были получены замечания по структуре репозитория и воспроизводимости инфраструктуры. Первым этапом была выполнена очистка рабочего репозитория и дополнительная проверка Terraform-конфигурации.
+
+### Удаление резервных файлов
+
+В репозитории оставались локальные резервные копии конфигурационных файлов:
+
+```text
+terraform/bastion.tf.bak_before_cleanup_2026-09-06
+ansible/docker.yml.bak_before_kibana_2026-09-06
+ansible/docker.yml.bak_2026-09-06
+ansible/inventory.ini.bak_2026-09-06
+ansible/filebeat.yml.bak_2026-09-06
+site/docker-compose.prod.yml.bak_before_diploma
+```
+
+Такие файлы были удалены, поскольку все предыдущие версии конфигурации уже сохраняются в истории Git.
+
+Для предотвращения повторного появления локальных backup-файлов в `.gitignore` добавлены правила:
+
+```gitignore
+# Local backup files
+*.bak
+*.bak_*
+```
+
+Таким образом, рабочий репозиторий содержит только актуальные версии конфигурационных файлов.
+
+### Удаление небезопасного комментария из Security Group
+
+В `security-groups.tf` в Security Group Bastion оставалась закомментированная строка:
+
+```hcl
+#v4_cidr_blocks = ["0.0.0.0/0"]
+```
+
+Она была удалена.
+
+Фактическое правило SSH-доступа к Bastion осталось ограничено административным адресом:
+
+```hcl
+ingress {
+  protocol       = "TCP"
+  description    = "SSH from administrator public IP"
+  v4_cidr_blocks = [var.admin_cidr]
+  port           = 22
+}
+```
+
+Разрешения `0.0.0.0/0` в правилах `egress` сохранены, поскольку они используются для исходящего трафика и не открывают входящий доступ к сервисам.
+
+### Перевод VM из прерываемого режима
+
+Перед сдачей дипломной работы все восемь рабочих виртуальных машин были переведены из режима:
+
+```hcl
+preemptible = true
+```
+
+в:
+
+```hcl
+preemptible = false
+```
+
+Изменение выполнено для:
+
+```text
+bastion
+web-01
+web-02
+zabbix
+elasticsearch
+kibana
+db-01
+db-02
+```
+
+Поскольку изменение `scheduling_policy` требует остановки VM, в Terraform было явно разрешено временно останавливать экземпляры при обновлении:
+
+```hcl
+allow_stopping_for_update = true
+```
+
+Изменение было применено без пересоздания ресурсов:
+
+```text
+Apply complete! Resources: 0 added, 8 changed, 0 destroyed.
+```
+
+После обновления все VM вернулись в состояние `RUNNING`.
+
+### Обнаружение проблемы с динамическим образом Ubuntu
+
+Во время контрольной проверки Terraform после обновления авторизации был выполнен:
+
+```bash
+terraform plan
+```
+
+Неожиданно Terraform предложил полностью пересоздать все восемь виртуальных машин:
+
+```text
+Plan: 8 to add, 2 to change, 8 to destroy.
+```
+![Снимок экрана — 2026-09-14 в 15.51.20](assets/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%C2%A0%E2%80%94%202026-09-14%20%D0%B2%C2%A015.51.20.png)
+
+
+Применение данного плана не выполнялось.
+
+При анализе было обнаружено, что Ubuntu выбиралась через семейство образов:
+
+```hcl
+data "yandex_compute_image" "ubuntu" {
+  family = "ubuntu-2404-lts-oslogin"
+}
+```
+
+Все VM использовали:
+
+```hcl
+image_id = data.yandex_compute_image.ubuntu.id
+```
+
+За время существования инфраструктуры в Yandex Cloud появился новый образ в том же семействе.
+
+Существующие VM были созданы из:
+
+```text
+fd849rcpqs7mf5d38vg5
+ubuntu-2404-lts-oslogin-v20260831
+```
+
+а data source начал возвращать новый образ:
+
+```text
+fd87qtsvhi9tt4req2uc
+```
+![Снимок экрана — 2026-09-14 в 15.51.01](assets/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%C2%A0%E2%80%94%202026-09-14%20%D0%B2%C2%A015.51.01.png)
+
+Для загрузочного диска изменение `image_id` требует пересоздания виртуальной машины, поэтому Terraform запланировал замену всего вычислительного контура.
+
+Существование исходного образа было проверено:
+
+```bash
+yc compute image get fd849rcpqs7mf5d38vg5
+```
+
+Образ находился в состоянии:
+
+```text
+status: READY
+```
+
+После этого базовый образ был закреплён за конкретной версией:
+
+```hcl
+data "yandex_compute_image" "ubuntu" {
+  image_id = "fd849rcpqs7mf5d38vg5"
+}
+```
+
+Это устранило зависимость существующей инфраструктуры от появления новых образов внутри семейства `ubuntu-2404-lts-oslogin`.
+
+#### Финальная проверка Terraform
+
+После внесённых изменений выполнены:
+
+```bash
+terraform fmt
+terraform validate
+terraform plan
+```
+
+Проверка конфигурации:
+
+```text
+Success! The configuration is valid.
+```
+
+Итоговый Terraform Plan:
+
+```text
+No changes. Your infrastructure matches the configuration.
+```
+
+Таким образом, применение исправлений не потребовало пересоздания работающих виртуальных машин, а Terraform-конфигурация была приведена в состояние, соответствующее фактически развёрнутой инфраструктуре.
+
+Дополнительно был устранён риск неожиданного пересоздания VM при появлении новой версии Ubuntu в Yandex Cloud.
+
+
+### Исправление идемпотентности Zabbix Agent и Filebeat
+
+По замечанию проверяющего в `zabbix-agent.yml` и `filebeat.yml` были удалены безусловные перезапуски сервисов через:
+
+```yaml
+state: restarted
+```
+
+Перезапуск перенесён в `handlers`, а задачи изменения конфигурации вызывают их через `notify`.
+
+Для Zabbix Agent:
+
+```yaml
+notify: Restart Zabbix Agent 2
+```
+
+Для Filebeat:
+
+```yaml
+notify: Restart Filebeat
+```
+
+Основные задачи теперь только гарантируют, что сервисы запущены и включены в автозагрузку:
+
+```yaml
+state: started
+enabled: true
+```
+
+После изменений playbook были выполнены дважды.
+
+Повторный запуск `zabbix-agent.yml` завершился без изменений:
+
+```text
+changed=0
+failed=0
+```
+
+на всех восьми узлах.
+
+Повторный запуск `filebeat.yml` также завершился без изменений:
+
+```text
+web-01.ru-central1.internal : changed=0 failed=0
+web-02.ru-central1.internal : changed=0 failed=0
+```
+
+Дополнительно была устранена зависимость от локального файла `filebeat-9.5.3-amd64.deb`.
+
+Прямое скачивание пакета через `ansible.builtin.get_url` возвращало:
+
+```text
+HTTP Error 403: Forbidden
+```
+
+Поэтому загрузка была перенесена на управляющую машину через `curl`, после чего пакет автоматически копируется Ansible на обе web-ноды.
+
+В результате оба playbook стали идемпотентными и больше не выполняют ненужные перезапуски сервисов при повторном запуске.
+
+![Снимок экрана — 2026-09-14 в 16.09.00](assets/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%C2%A0%E2%80%94%202026-09-14%20%D0%B2%C2%A016.09.00.png)
+![Снимок экрана — 2026-09-14 в 16.09.07](assets/%D0%A1%D0%BD%D0%B8%D0%BC%D0%BE%D0%BA%20%D1%8D%D0%BA%D1%80%D0%B0%D0%BD%D0%B0%C2%A0%E2%80%94%202026-09-14%20%D0%B2%C2%A016.09.07.png)
+
+### Исправление настройки Nginx через Ansible
+
+По замечанию проверяющего конфигурация Nginx была перенесена под управление Ansible. Ранее `nginx.yml` устанавливал пакет `nginx` и запускал сервис, но конфигурация reverse proxy находилась отдельно в `site/deploy/nginx.conf` и самим playbook не разворачивалась.
+
+В `nginx.yml` добавлено копирование конфигурации reverse proxy:
+
+```yaml
+- name: Deploy nginx reverse proxy configuration
+  ansible.builtin.copy:
+    src: ../site/deploy/nginx.conf
+    dest: /etc/nginx/sites-available/diploma
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+```
+
+Для активации конфигурации средствами Ansible создаётся символическая ссылка в `sites-enabled`, а стандартная конфигурация Nginx отключается.
+
+Изменение конфигурации вызывает `handler`, поэтому `nginx` перезагружается только тогда, когда конфигурация действительно была изменена:
+
+```yaml
+handlers:
+  - name: Reload nginx
+    ansible.builtin.service:
+      name: nginx
+      state: reloaded
+```
+
+Перед применением конфигурации выполняется проверка:
+
+```yaml
+- name: Test nginx configuration
+  ansible.builtin.command:
+    cmd: nginx -t
+  changed_when: false
+```
+
+После изменения playbook был выполнен дважды.
+
+При первом запуске конфигурация была развёрнута на обеих web-нодах и был вызван handler:
+
+```text
+RUNNING HANDLER [Reload nginx]
+changed: [web-02.ru-central1.internal]
+changed: [web-01.ru-central1.internal]
+```
+
+Повторный запуск подтвердил идемпотентность playbook:
+
+```text
+web-01.ru-central1.internal : changed=0 failed=0
+web-02.ru-central1.internal : changed=0 failed=0
+```
+
+Дополнительно конфигурация Nginx была проверена непосредственно на обеих web-нодах:
+
+```text
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+```
+
+После применения изменений выполнена проверка приложения через Application Load Balancer:
+
+```text
+HTTP/1.1 200 OK
+server: ycalb
+
+{"status":"ready","database":"ok"}
+```
+
+Таким образом, конфигурация reverse proxy теперь полностью управляется через Ansible, изменения Nginx применяются через `handler`, повторный запуск playbook не вносит изменений, а доступность приложения через балансировщик после внесённых изменений подтверждена.
+
+
+### Исправление настройки PostgreSQL через Ansible
+
+По замечанию проверяющего конфигурация PostgreSQL была перенесена под управление Ansible. До исправления PostgreSQL и потоковая репликация уже работали, однако значительная часть конфигурации была выполнена вручную и не была полностью отражена в `postgres.yml`.
+
+Перед изменением playbook было проверено фактическое состояние обоих серверов.
+
+Проверка показала:
+
+```text
+db-02:
+PostgreSQL 16.15
+service: active
+cluster: online
+pg_is_in_recovery(): f
+
+db-01:
+PostgreSQL 16.15
+service: active
+cluster: online,recovery
+pg_is_in_recovery(): t
+```
+
+Также на `db-02` была обнаружена активная streaming-репликация:
+
+```text
+application_name | 16/main
+client_addr      | 10.10.20.4
+state            | streaming
+sync_state       | async
+```
+
+На `db-01` был активен WAL receiver:
+
+```text
+status      | streaming
+sender_host | db-02.ru-central1.internal
+sender_port | 5432
+```
+
+Таким образом, фактическая схема PostgreSQL оказалась следующей:
+
+```text
+db-02 (PRIMARY)  --->  db-01 (STANDBY)
+```
+
+#### Исправление ролей серверов в inventory
+
+В `inventory.ini` роли серверов не соответствовали фактическому состоянию PostgreSQL. После проверки они были исправлены:
+
+```ini
+[db_primary]
+db-02.ru-central1.internal
+
+[db_standby]
+db-01.ru-central1.internal
+```
+
+После изменения была выполнена проверка:
+
+```text
+db_primary:
+db-02.ru-central1.internal -> db-02
+
+db_standby:
+db-01.ru-central1.internal -> db-01
+```
+
+Это исключило ситуацию, при которой Ansible мог применять задачи primary к фактическому standby и наоборот.
+
+#### Проверка и исправление primary_conninfo
+
+При проверке standby в `postgresql.auto.conf` были обнаружены две записи `primary_conninfo`, оставшиеся после предыдущих ручных настроек:
+
+```text
+primary_conninfo = ... host='db-01.ru-central1.internal' ...
+primary_conninfo = ... host='db-02.ru-central1.internal' ...
+```
+
+При этом PostgreSQL фактически использовал корректную конфигурацию:
+
+```text
+user=replicator
+host='db-02.ru-central1.internal'
+port=5432
+```
+
+То есть `db-01` действительно получал WAL от `db-02`.
+
+После этого конфигурация Ansible была приведена в соответствие с фактической схемой, а primary для standby зафиксирован как:
+
+```yaml
+primary_host: "db-02.ru-central1.internal"
+```
+
+#### Перенос основных параметров PostgreSQL под Ansible
+
+Общие параметры PostgreSQL были вынесены в отдельный управляемый файл:
+
+```text
+/etc/postgresql/16/main/conf.d/diploma.conf
+```
+
+В `postgres.yml` добавлена задача:
+
+```yaml
+- name: Deploy common PostgreSQL configuration
+  ansible.builtin.copy:
+    dest: "{{ postgresql_conf_dir }}/conf.d/diploma.conf"
+    owner: postgres
+    group: postgres
+    mode: "0644"
+    content: |
+      listen_addresses = '*'
+      wal_level = replica
+      max_wal_senders = 10
+      max_replication_slots = 10
+      hot_standby = on
+  notify: Restart PostgreSQL
+```
+
+Под управление Ansible были перенесены параметры:
+
+```text
+listen_addresses = '*'
+wal_level = replica
+max_wal_senders = 10
+max_replication_slots = 10
+hot_standby = on
+```
+
+Проверка через `pg_settings` подтвердила фактически используемые значения:
+
+```text
+listen_addresses      | *
+wal_level             | replica
+max_wal_senders       | 10
+max_replication_slots | 10
+hot_standby           | on
+```
+
+#### Перенос pg_hba.conf под управление Ansible
+
+До исправления необходимые правила доступа уже присутствовали в `pg_hba.conf`, но были созданы вручную.
+
+Для web-серверов использовались:
+
+```text
+host phr phr 10.10.20.12/32 scram-sha-256
+host phr phr 10.10.30.24/32 scram-sha-256
+```
+
+Для репликации использовалось правило:
+
+```text
+host replication replicator 10.10.20.4/32 scram-sha-256
+```
+
+В `postgres.yml` управление этими правилами было реализовано через:
+
+```yaml
+community.postgresql.postgresql_pg_hba
+```
+
+В результате разрешения для приложения и репликации теперь создаются и контролируются Ansible.
+
+#### Устранение лишних перезапусков PostgreSQL
+
+При переносе конфигурации была учтена идемпотентность playbook.
+
+Из задач было исключено безусловное использование:
+
+```yaml
+state: restarted
+```
+
+Изменения конфигурации теперь вызывают handlers через `notify`.
+
+Для изменения основных параметров:
+
+```yaml
+notify: Restart PostgreSQL
+```
+
+Для изменения `pg_hba.conf`:
+
+```yaml
+notify: Reload PostgreSQL
+```
+
+Таким образом, PostgreSQL перезапускается или перечитывает конфигурацию только тогда, когда Ansible действительно обнаружил изменение.
+
+#### Вынос паролей из postgres.yml
+
+При переносе пользователей PostgreSQL под Ansible возникла необходимость хранить пароль пользователя приложения и пароль пользователя репликации.
+
+Хранить их непосредственно в `postgres.yml` было решено не делать.
+
+Был создан:
+
+```text
+group_vars/all/vault.yml
+```
+
+с использованием:
+
+```bash
+ansible-vault create group_vars/all/vault.yml
+```
+
+В playbook используются переменные:
+
+```yaml
+postgres_app_password
+postgres_replication_password
+```
+
+а запуск выполняется с:
+
+```bash
+ansible-playbook -i inventory.ini postgres.yml \
+  --ask-vault-pass
+```
+
+При первоначальной настройке Vault возникла ошибка:
+
+```text
+Decryption failed (no vault secrets were found that could decrypt)
+```
+
+Также после успешной расшифровки проверка переменных показывала:
+
+```text
+app_password_defined=False
+replication_password_defined=False
+```
+
+Причиной оказался некорректно заполненный/сохранённый `vault.yml` при работе через `vim`, а также путаница с введённым Vault-паролем.
+
+Vault-файл был исправлен, после чего Ansible начал корректно загружать обе переменные.
+
+#### Проблема с python3-psycopg2
+
+После исправления Vault playbook дошёл до модуля:
+
+```text
+community.postgresql.postgresql_user
+```
+
+но завершился ошибкой:
+
+```text
+Failed to import the required Python library (psycopg2)
+on db-02's Python /usr/bin/python3.12
+```
+
+Причина заключалась в том, что PostgreSQL был установлен, но Python-интерпретатор, которым Ansible выполнял PostgreSQL-модули на удалённой машине, не имел необходимого адаптера.
+
+В playbook была добавлена установка:
+
+```yaml
+- name: Install PostgreSQL and Python adapter
+  ansible.builtin.apt:
+    name:
+      - postgresql-16
+      - postgresql-client-16
+      - python3-psycopg2
+    state: present
+    update_cache: true
+```
+
+После реальной установки `python3-psycopg2` ошибка исчезла.
+
+#### Проблема Peer authentication failed for user postgres
+
+Следующей ошибкой при выполнении `community.postgresql.postgresql_user` стала:
+
+```text
+FATAL: Peer authentication failed for user "postgres"
+```
+
+В `pg_hba.conf` используется:
+
+```text
+local all postgres peer
+```
+
+Поэтому PostgreSQL разрешает локальное подключение к роли `postgres` без пароля только системному пользователю `postgres`.
+
+Задачи управления PostgreSQL были исправлены так, чтобы выполняться от имени системного пользователя `postgres`:
+
+```yaml
+become_user: postgres
+```
+
+После этого модули `community.postgresql` получили возможность подключаться через локальный Unix socket с `peer`-аутентификацией.
+
+После исправления успешно отработали:
+
+```text
+TASK [Ensure application role exists]
+ok: [db-02.ru-central1.internal]
+
+TASK [Ensure application database exists]
+ok: [db-02.ru-central1.internal]
+
+TASK [Ensure replication role exists]
+ok: [db-02.ru-central1.internal]
+```
+
+#### Управление пользователями и базой данных через Ansible
+
+На primary теперь средствами Ansible контролируется пользователь приложения:
+
+```yaml
+community.postgresql.postgresql_user:
+  name: phr
+  password: "{{ postgres_app_password }}"
+  role_attr_flags: LOGIN
+  state: present
+```
+
+База данных:
+
+```yaml
+community.postgresql.postgresql_db:
+  name: phr
+  owner: phr
+  state: present
+```
+
+и пользователь репликации:
+
+```yaml
+community.postgresql.postgresql_user:
+  name: replicator
+  password: "{{ postgres_replication_password }}"
+  role_attr_flags: LOGIN,REPLICATION
+  state: present
+```
+
+Пароли скрываются из вывода Ansible через:
+
+```yaml
+no_log: true
+```
+
+#### Автоматизация первоначального создания standby
+
+Для возможности развернуть standby средствами Ansible в `postgres.yml` добавлена первоначальная инициализация через:
+
+```text
+pg_basebackup
+```
+
+Команда выполняется следующим образом:
+
+```yaml
+- name: Initialize standby from primary
+  ansible.builtin.command:
+    cmd: >
+      pg_basebackup
+      -h {{ primary_host }}
+      -p 5432
+      -U replicator
+      -D {{ postgresql_data_dir }}
+      -Fp
+      -Xs
+      -P
+      -R
+```
+
+Пароль пользователя репликации передаётся через `.pgpass`:
+
+```text
+/var/lib/postgresql/.pgpass
+```
+
+Файл создаётся с правами:
+
+```text
+0600
+```
+
+и принадлежит пользователю `postgres`.
+
+#### Защита существующего standby от удаления
+
+Наиболее опасной частью автоматизации является первоначальное создание standby, поскольку для `pg_basebackup` требуется пустой каталог данных.
+
+Чтобы повторный запуск playbook не удалил существующую рабочую БД, перед этими операциями выполняется проверка:
+
+```yaml
+- name: Check standby signal
+  ansible.builtin.stat:
+    path: "{{ postgresql_data_dir }}/standby.signal"
+  register: standby_signal
+```
+
+Остановка PostgreSQL, удаление каталога данных, его повторное создание и `pg_basebackup` выполняются только при условии:
+
+```yaml
+when: not standby_signal.stat.exists
+```
+
+На существующем `db-01` Ansible обнаружил `standby.signal`, поэтому опасные операции были пропущены:
+
+```text
+TASK [Stop PostgreSQL before initial standby creation]
+skipping: [db-01.ru-central1.internal]
+
+TASK [Remove default PostgreSQL data directory before base backup]
+skipping: [db-01.ru-central1.internal]
+
+TASK [Recreate PostgreSQL data directory]
+skipping: [db-01.ru-central1.internal]
+
+TASK [Initialize standby from primary]
+skipping: [db-01.ru-central1.internal]
+```
+
+Таким образом, существующая рабочая реплика не была пересоздана.
+
+#### Проверка playbook перед применением
+
+Сначала была выполнена синтаксическая проверка:
+
+```bash
+ansible-playbook -i inventory.ini postgres.yml \
+  --syntax-check \
+  --ask-vault-pass
+```
+
+Результат:
+
+```text
+playbook: postgres.yml
+```
+
+После этого выполнена проверка в check mode:
+
+```bash
+ansible-playbook -i inventory.ini postgres.yml \
+  --check \
+  --diff \
+  --ask-vault-pass
+```
+
+После устранения проблем с Vault, `psycopg2` и peer-аутентификацией проверка завершилась без ошибок.
+
+#### Результат применения postgres.yml
+
+После проверки playbook был применён к инфраструктуре.
+
+На существующем standby задачи первоначального создания реплики были пропущены, а PostgreSQL остался запущен:
+
+```text
+TASK [Ensure PostgreSQL standby is running]
+ok: [db-01.ru-central1.internal]
+```
+
+Итог выполнения:
+
+```text
+PLAY RECAP
+
+db-01.ru-central1.internal :
+ok=11
+changed=3
+unreachable=0
+failed=0
+skipped=4
+
+db-02.ru-central1.internal :
+ok=12
+changed=2
+unreachable=0
+failed=0
+skipped=0
+```
+
+В результате исправления установка PostgreSQL, основные параметры сервера, `pg_hba.conf`, пользователи `phr` и `replicator`, база `phr` и первоначальное создание standby теперь описаны в Ansible.
+
+Фактическая схема после исправления:
+
+```text
+web-01 ─┐
+        ├──> db-02 (PRIMARY) ── streaming replication ──> db-01 (STANDBY)
+web-02 ─┘
+```
+
+Пароли вынесены в Ansible Vault, существующая реплика защищена от повторной инициализации, а применение playbook завершается с `failed=0` на обоих PostgreSQL-серверах.
+
+
+### Автоматизация развёртывания приложения через Ansible
+
+После переноса конфигурации Nginx и PostgreSQL под управление Ansible следующим этапом была автоматизирована установка и развёртывание приложения на `web-01` и `web-02`.
+
+Ранее приложение копировалось на обе web-ноды вручную через Bastion Host и размещалось в каталоге `/home/ubuntu/phr`. При повторном создании инфраструктуры этот этап пришлось бы выполнять вручную заново.
+
+Перед созданием playbook было проверено текущее состояние приложения на обеих web-нодах:
+
+```bash
+ansible web -i inventory.ini -b \
+  --ask-vault-pass \
+  -m shell -a '
+echo "===== HOST ====="
+hostname
+echo
+echo "===== APP DIR ====="
+ls -ld /home/ubuntu/phr
+echo
+echo "===== CONTAINERS ====="
+docker ps
+echo
+echo "===== COMPOSE PROJECTS ====="
+docker compose ls
+'
+```
+
+Проверка показала, что на обеих нодах приложение находится в `/home/ubuntu/phr` и запущено через Docker Compose:
+
+```text
+===== CONTAINERS =====
+phr-web-1   127.0.0.1:8000->8000/tcp
+
+===== COMPOSE PROJECTS =====
+NAME    STATUS       CONFIG FILES
+phr     running(1)   /home/ubuntu/phr/docker-compose.prod.yml
+```
+
+Также перед автоматизацией была проверена текущая версия миграций Alembic:
+
+```bash
+ansible web -i inventory.ini -b \
+  --ask-vault-pass \
+  -m shell -a '
+echo "===== HOST ====="
+hostname
+echo "===== ALEMBIC CURRENT ====="
+docker exec phr-web-1 alembic current 2>/dev/null || true
+echo "===== ALEMBIC HEADS ====="
+docker exec phr-web-1 alembic heads 2>/dev/null || true
+'
+```
+
+На обеих web-нодах база находилась на последней миграции:
+
+```text
+===== ALEMBIC CURRENT =====
+20260325_000032 (head)
+
+===== ALEMBIC HEADS =====
+20260325_000032 (head)
+```
+
+Для автоматизации развёртывания был создан отдельный playbook `deploy-app.yml` и каталог для шаблонов:
+
+```bash
+nano deploy-app.yml
+mkdir -p templates
+```
+
+В playbook были добавлены задачи для проверки Docker, создания каталога приложения, копирования исходных файлов, формирования production-конфигурации, выполнения миграций Alembic, сборки и запуска приложения через Docker Compose и последующей проверки `/health`.
+
+Production-конфигурация приложения содержит `DATABASE_URL` и `SECRET_KEY`, поэтому чувствительные значения не сохранялись непосредственно в playbook. Для них использован уже созданный Ansible Vault.
+
+Сначала было проверено содержимое Vault без вывода самих секретов:
+
+```bash
+ansible-vault view group_vars/all/vault.yml --ask-vault-pass \
+  | sed -E 's/^([A-Za-z_][A-Za-z0-9_]*):.*/\1: <hidden>/'
+```
+
+На этом этапе в Vault уже находились:
+
+```text
+postgres_app_password: <hidden>
+postgres_replication_password: <hidden>
+```
+
+В Vault были добавлены необходимые переменные приложения, а для создания `.env.production` подготовлен шаблон `templates/app.env.production.j2`.
+
+После добавления переменных была выполнена проверка их доступности на обеих web-нодах без вывода секретных значений:
+
+```bash
+ansible web -i inventory.ini \
+  -m debug \
+  -a 'msg="database_url={{ app_database_url is defined }}, secret_key={{ app_secret_key is defined }}, cookie_secure={{ app_session_cookie_secure is defined }}, https_redirect={{ app_force_https_redirect is defined }}"' \
+  --ask-vault-pass
+```
+
+Результат:
+
+```text
+web-01.ru-central1.internal | SUCCESS => {
+    "msg": "database_url=True, secret_key=True, cookie_secure=True, https_redirect=True"
+}
+
+web-02.ru-central1.internal | SUCCESS => {
+    "msg": "database_url=True, secret_key=True, cookie_secure=True, https_redirect=True"
+}
+```
+
+Таким образом, `.env.production` формируется средствами Ansible из шаблона, а чувствительные значения хранятся в зашифрованном Vault.
+
+Перед выполнением playbook была проведена проверка синтаксиса:
+
+```bash
+ansible-playbook -i inventory.ini deploy-app.yml \
+  --syntax-check \
+  --ask-vault-pass
+```
+
+Результат:
+
+```text
+playbook: deploy-app.yml
+```
+
+При первом запуске возникла ошибка на этапе установки Docker:
+
+```text
+TASK [Ensure Docker is installed]
+
+containerd.io : Conflicts: containerd
+```
+
+Первоначально в playbook была указана установка пакетов:
+
+```text
+docker.io
+docker-compose-v2
+```
+
+Для определения причины ошибки была проверена фактическая установка Docker на обеих web-нодах:
+
+```text
+Docker version 29.8.0
+Docker Compose version v5.5.1
+
+containerd.io
+docker-buildx-plugin
+docker-ce
+docker-ce-cli
+docker-ce-rootless-extras
+docker-compose-plugin
+```
+
+Также было установлено, что Docker используется из официального репозитория:
+
+```text
+/etc/apt/sources.list.d/docker.list:
+https://download.docker.com/linux/ubuntu noble stable
+```
+
+Причиной ошибки оказался конфликт пакета `containerd` из репозитория Ubuntu с уже установленным `containerd.io`, используемым Docker CE.
+
+После этого playbook был исправлен: вместо `docker.io` и `docker-compose-v2` используются пакеты Docker CE, соответствующие уже существующей конфигурации серверов.
+
+После исправления задача стала выполняться без ошибок:
+
+```text
+TASK [Ensure Docker CE packages are installed]
+ok: [web-01.ru-central1.internal]
+ok: [web-02.ru-central1.internal]
+```
+
+Перед фактическим развёртыванием playbook был запущен в режиме проверки:
+
+```bash
+ansible-playbook -i inventory.ini deploy-app.yml \
+  --check \
+  --diff \
+  --ask-vault-pass
+```
+
+Результат:
+
+```text
+PLAY RECAP
+
+web-01.ru-central1.internal : ok=6 changed=2 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0
+web-02.ru-central1.internal : ok=6 changed=2 unreachable=0 failed=0 skipped=3 rescued=0 ignored=0
+```
+
+Во время проверки задача `Copy application files` выполнялась заметно дольше остальных. В playbook для доставки приложения используется рекурсивный `ansible.builtin.copy`, поэтому Ansible проверяет и обрабатывает большое количество файлов каталога приложения отдельно для обеих web-нод. После завершения задача выполнилась без ошибок.
+
+После успешной проверки выполнено реальное развёртывание:
+
+```bash
+ansible-playbook -i inventory.ini deploy-app.yml \
+  --ask-vault-pass
+```
+
+Docker и каталог приложения были успешно проверены:
+
+```text
+TASK [Ensure Docker CE packages are installed]
+ok: [web-01.ru-central1.internal]
+ok: [web-02.ru-central1.internal]
+
+TASK [Ensure Docker is enabled and running]
+ok: [web-01.ru-central1.internal]
+ok: [web-02.ru-central1.internal]
+
+TASK [Ensure application directory exists]
+ok: [web-01.ru-central1.internal]
+ok: [web-02.ru-central1.internal]
+```
+
+После копирования приложения и формирования `.env.production` автоматически были применены миграции базы данных:
+
+```text
+TASK [Apply database migrations]
+ok: [web-01.ru-central1.internal]
+ok: [web-02.ru-central1.internal]
+```
+
+Затем приложение было собрано и запущено через Docker Compose:
+
+```text
+TASK [Build and start application]
+changed: [web-01.ru-central1.internal]
+changed: [web-02.ru-central1.internal]
+```
+
+После запуска Ansible автоматически проверяет доступность приложения по адресу `http://127.0.0.1:8000/health`.
+
+При первой попытке контейнеры ещё не успели полностью запустить приложение:
+
+```text
+FAILED - RETRYING: [web-02.ru-central1.internal]: Wait for application health check
+FAILED - RETRYING: [web-01.ru-central1.internal]: Wait for application health check
+```
+
+Для healthcheck в playbook предусмотрены повторные попытки, поэтому ручное вмешательство не потребовалось. После запуска приложения следующая проверка завершилась успешно:
+
+```text
+TASK [Wait for application health check]
+ok: [web-01.ru-central1.internal]
+ok: [web-02.ru-central1.internal]
+```
+
+Первое полное выполнение playbook завершилось без ошибок:
+
+```text
+PLAY RECAP
+
+web-01.ru-central1.internal : ok=9 changed=3 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0
+web-02.ru-central1.internal : ok=9 changed=3 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0
+```
+
+После этого playbook был выполнен повторно для проверки повторного развёртывания:
+
+```bash
+ansible-playbook -i inventory.ini deploy-app.yml \
+  --ask-vault-pass
+```
+
+Повторный запуск также завершился без ошибок:
+
+```text
+PLAY RECAP
+
+web-01.ru-central1.internal : ok=9 changed=3 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0
+web-02.ru-central1.internal : ok=9 changed=3 unreachable=0 failed=0 skipped=0 rescued=0 ignored=0
+```
+
+При повторном выполнении задачи копирования файлов и сборки контейнера снова получили статус `changed`. Это связано с текущим использованием рекурсивного `ansible.builtin.copy` и последующим запуском `docker compose` с параметром `--build`. При этом повторное выполнение playbook не приводит к ошибкам и не нарушает работу приложения.
+
+После завершения развёртывания была выполнена итоговая проверка контейнера, healthcheck и миграций на обеих web-нодах:
+
+```bash
+ansible web -i inventory.ini -b \
+  --ask-vault-pass \
+  -m shell -a '
+echo "===== HOST ====="
+hostname
+
+echo "===== CONTAINER ====="
+docker ps --filter name=phr-web-1
+
+echo "===== HEALTH ====="
+curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:8000/health
+
+echo "===== ALEMBIC ====="
+docker exec phr-web-1 alembic current
+'
+```
+
+Результат для `web-01`:
+
+```text
+===== HOST =====
+web-01
+
+===== CONTAINER =====
+phr-web-1
+Up
+127.0.0.1:8000->8000/tcp
+
+===== HEALTH =====
+HTTP 200
+
+===== ALEMBIC =====
+20260325_000032 (head)
+```
+
+Результат для `web-02`:
+
+```text
+===== HOST =====
+web-02
+
+===== CONTAINER =====
+phr-web-1
+Up
+127.0.0.1:8000->8000/tcp
+
+===== HEALTH =====
+HTTP 200
+
+===== ALEMBIC =====
+20260325_000032 (head)
+```
+
+В результате развёртывание приложения на `web-01` и `web-02` перенесено под управление Ansible. После повторного создания инфраструктуры приложение больше не требуется вручную копировать через Bastion Host: playbook доставляет файлы приложения, формирует production-конфигурацию из Ansible Vault, применяет миграции Alembic, собирает и запускает Docker-контейнеры и проверяет работоспособность приложения через `/health`.

@@ -1,8 +1,9 @@
 resource "yandex_compute_instance" "kibana" {
-  name        = "kibana"
-  hostname    = "kibana"
-  description = "Kibana server for centralized log visualization"
-  zone        = "ru-central1-d"
+  name                      = "kibana"
+  allow_stopping_for_update = true
+  hostname                  = "kibana"
+  description               = "Kibana server for centralized log visualization"
+  zone                      = "ru-central1-d"
 
   platform_id = "standard-v3"
 
@@ -13,7 +14,7 @@ resource "yandex_compute_instance" "kibana" {
   }
 
   scheduling_policy {
-    preemptible = true
+    preemptible = false
   }
 
   boot_disk {

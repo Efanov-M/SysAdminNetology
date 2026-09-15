@@ -1,8 +1,9 @@
 resource "yandex_compute_instance" "elasticsearch" {
-  name        = "elasticsearch"
-  hostname    = "elasticsearch"
-  description = "Elasticsearch server for centralized logging"
-  zone        = "ru-central1-d"
+  name                      = "elasticsearch"
+  allow_stopping_for_update = true
+  hostname                  = "elasticsearch"
+  description               = "Elasticsearch server for centralized logging"
+  zone                      = "ru-central1-d"
 
   platform_id = "standard-v3"
 
@@ -13,7 +14,7 @@ resource "yandex_compute_instance" "elasticsearch" {
   }
 
   scheduling_policy {
-    preemptible = true
+    preemptible = false
   }
 
   boot_disk {

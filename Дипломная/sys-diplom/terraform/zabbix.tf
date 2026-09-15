@@ -1,8 +1,9 @@
 resource "yandex_compute_instance" "zabbix" {
-  name        = "zabbix"
-  hostname    = "zabbix"
-  description = "Zabbix monitoring server"
-  zone        = "ru-central1-d"
+  name                      = "zabbix"
+  allow_stopping_for_update = true
+  hostname                  = "zabbix"
+  description               = "Zabbix monitoring server"
+  zone                      = "ru-central1-d"
 
   platform_id = "standard-v3"
 
@@ -13,7 +14,7 @@ resource "yandex_compute_instance" "zabbix" {
   }
 
   scheduling_policy {
-    preemptible = true
+    preemptible = false
   }
 
   boot_disk {

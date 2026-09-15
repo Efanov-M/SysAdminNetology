@@ -1,0 +1,79 @@
+---
+- name: Deploy application
+  hosts: web
+  become: true
+
+  vars:
+    app_dir: /home/ubuntu/phr
+    app_source: ../site
+
+  tasks:
+    - name: Ensure Docker CE packages are installed
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: true
+
+    - name: Ensure Docker is enabled and running
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Ensure application directory exists
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: "0755"
+
+    - name: Copy application files
+      ansible.builtin.copy:
+        src: "{{ app_source }}/"
+        dest: "{{ app_dir }}/"
+        owner: ubuntu
+        group: ubuntu
+        mode: preserve
+
+    - name: Deploy production environment file
+      ansible.builtin.template:
+        src: templates/env.production.j2
+        dest: "{{ app_dir }}/.env.production"
+        owner: ubuntu
+        group: ubuntu
+        mode: "0600"
+      no_log: true
+
+    - name: Apply database migrations
+      ansible.builtin.command:
+        cmd: docker compose -f docker-compose.prod.yml run --rm web alembic upgrade head
+        chdir: "{{ app_dir }}"
+      become_user: ubuntu
+      changed_when: false
+
+    - name: Build and start application
+      ansible.builtin.command:
+        cmd: docker compose -f docker-compose.prod.yml up -d --build
+        chdir: "{{ app_dir }}"
+      become_user: ubuntu
+      register: compose_up
+      changed_when: >
+        'Started' in compose_up.stderr or
+        'Created' in compose_up.stderr or
+        'Recreated' in compose_up.stderr or
+        'Building' in compose_up.stderr
+
+    - name: Wait for application health check
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:8000/health"
+        status_code: 200
+      register: healthcheck
+      retries: 10
+      delay: 3
+      until: healthcheck.status == 200

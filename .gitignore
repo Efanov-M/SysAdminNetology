@@ -19,3 +19,7 @@ crash.*.log
 .env
 .env.*
 Дипломная/sys-diplom/ansible/*.deb
+
+# Local backup files
+*.bak
+*.bak_*

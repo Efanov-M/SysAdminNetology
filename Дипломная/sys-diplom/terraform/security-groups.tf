@@ -7,8 +7,7 @@ resource "yandex_vpc_security_group" "bastion_sg" {
     protocol       = "TCP"
     description    = "SSH from administrator public IP"
     v4_cidr_blocks = [var.admin_cidr]
-    #v4_cidr_blocks = ["0.0.0.0/0"]
-    port = 22
+    port           = 22
   }
 
   egress {
