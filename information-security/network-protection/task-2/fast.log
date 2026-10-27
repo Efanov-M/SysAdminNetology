@@ -1,0 +1,21 @@
+08/18/2026-12:48:00.334414  [**] [1:2260002:1] SURICATA Applayer Detect protocol only one direction [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.10:22 -> 192.168.209.20:42040
+08/18/2026-12:48:00.334414  [**] [1:2228000:1] SURICATA SSH invalid banner [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.10:22 -> 192.168.209.20:42040
+08/18/2026-12:48:00.334470  [**] [1:2260002:1] SURICATA Applayer Detect protocol only one direction [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.10:22 -> 192.168.209.20:42042
+08/18/2026-12:48:00.334470  [**] [1:2228000:1] SURICATA SSH invalid banner [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.10:22 -> 192.168.209.20:42042
+08/18/2026-12:48:00.334601  [**] [1:2228000:1] SURICATA SSH invalid banner [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:42040 -> 192.168.209.10:22
+08/18/2026-12:48:00.334719  [**] [1:2228000:1] SURICATA SSH invalid banner [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:42042 -> 192.168.209.10:22
+08/18/2026-12:48:00.340736  [**] [1:2260002:1] SURICATA Applayer Detect protocol only one direction [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.10:22 -> 192.168.209.20:42066
+08/18/2026-12:48:00.340736  [**] [1:2228000:1] SURICATA SSH invalid banner [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.10:22 -> 192.168.209.20:42066
+08/18/2026-12:48:00.340873  [**] [1:2228000:1] SURICATA SSH invalid banner [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:42066 -> 192.168.209.10:22
+08/18/2026-12:48:03.933517  [**] [1:2210054:1] SURICATA STREAM excessive retransmissions [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:41944 -> 192.168.209.10:22
+08/18/2026-12:48:03.933517  [**] [1:2210054:1] SURICATA STREAM excessive retransmissions [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:41924 -> 192.168.209.10:22
+08/18/2026-12:48:03.933517  [**] [1:2210054:1] SURICATA STREAM excessive retransmissions [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:42012 -> 192.168.209.10:22
+08/18/2026-12:48:04.893378  [**] [1:2210054:1] SURICATA STREAM excessive retransmissions [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:42000 -> 192.168.209.10:22
+08/18/2026-12:48:04.894020  [**] [1:2210054:1] SURICATA STREAM excessive retransmissions [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:41988 -> 192.168.209.10:22
+08/18/2026-12:48:04.894020  [**] [1:2210054:1] SURICATA STREAM excessive retransmissions [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:42028 -> 192.168.209.10:22
+08/18/2026-12:48:04.893378  [**] [1:2210054:1] SURICATA STREAM excessive retransmissions [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:41960 -> 192.168.209.10:22
+08/18/2026-12:48:05.853486  [**] [1:2210054:1] SURICATA STREAM excessive retransmissions [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:41926 -> 192.168.209.10:22
+08/18/2026-12:48:05.853550  [**] [1:2210054:1] SURICATA STREAM excessive retransmissions [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:41974 -> 192.168.209.10:22
+08/18/2026-12:48:05.853486  [**] [1:2210054:1] SURICATA STREAM excessive retransmissions [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:41992 -> 192.168.209.10:22
+08/18/2026-12:48:05.853550  [**] [1:2210054:1] SURICATA STREAM excessive retransmissions [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:41928 -> 192.168.209.10:22
+08/18/2026-12:48:06.045768  [**] [1:2210054:1] SURICATA STREAM excessive retransmissions [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {TCP} 192.168.209.20:42058 -> 192.168.209.10:22
